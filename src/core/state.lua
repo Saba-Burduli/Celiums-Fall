@@ -12,6 +12,9 @@ local Progression = require("src.systems.progression")
 local Hud = require("src.ui.hud")
 local Dialogue = require("src.ui.dialogue")
 local Menu = require("src.ui.menu")
+local Audio = require("src.core.audio")
+local Save = require("src.core.save")
+local Settings = require("src.core.settings")
 
 local State = { mode = "title" }
 
@@ -31,34 +34,52 @@ local function enterArea(game, name)
   notify(game, game.level.name)
 end
 
-local function newGame()
+local function applySave(game, saved)
+  if not saved then return end
+  local p = game.player
+  p.hp, p.maxHp = tonumber(saved.hp) or p.hp, tonumber(saved.maxHp) or p.maxHp
+  p.mana, p.maxMana = tonumber(saved.mana) or p.mana, tonumber(saved.maxMana) or p.maxMana
+  p.speed, p.magicDamage = tonumber(saved.speed) or p.speed, tonumber(saved.magicDamage) or p.magicDamage
+  p.dashCooldown = tonumber(saved.dashCooldown) or p.dashCooldown
+  p.questReward, game.mireDead = saved.questReward == "true", saved.mireDead == "true"
+  game.quest.status = saved.quest or game.quest.status
+  for kind in (saved.stones or ""):gmatch("[^,]+") do p.stones[kind] = true end
+end
+
+local function newGame(saved)
   local game = {
     player = Player.new(95, 360), projectiles = {}, particles = {}, quest = Quests.new(), mireDead = false,
     message = nil, messageTimer = 0, meleeFlash = 0, prompt = nil,
     questObjective = "",
     fonts = { small = love.graphics.newFont(15), normal = love.graphics.newFont(18) },
+    audio = Audio,
   }
+  applySave(game, saved)
   game.questObjective = Quests.objective(game.quest)
-  enterArea(game, "forest")
+  enterArea(game, saved and saved.area or "forest")
   return game
 end
 
-function State.load() State.mode = "title" end
+function State.load()
+  Settings.load(); Audio.load()
+  State.mode, State.hasSave = "title", Save.exists()
+end
 
 local function interact(game)
   local p = game.player
   if game.area == "forest" and Collision.near(p, { x = 175, y = 360 }, 65) then
-    notify(game, Quests.interact(game.quest, p)); return
+    notify(game, Quests.interact(game.quest, p)); Save.write(game); return
   end
   for _, item in ipairs(game.items) do
     if not item.collected and Collision.near(p, item, 45) then
       if item.questItem then
-        if Quests.takeMoonstone(game.quest) then item.collected = true; notify(game, "Lost Moonstone recovered.")
+        if Quests.takeMoonstone(game.quest) then item.collected = true; notify(game, "Lost Moonstone recovered."); game.audio.play("stone")
         else notify(game, "A pale stone. Someone may be searching for it.") end
       else
         local text = Progression.collect(p, item)
-        if text then notify(game, text) end
+        if text then notify(game, text); game.audio.play("stone") end
       end
+      Save.write(game)
       return
     end
   end
@@ -75,9 +96,9 @@ end
 local function transition(game)
   local exit = game.level.exit
   if not exit or not Collision.near(game.player, exit, 45) then return end
-  if game.area == "forest" then enterArea(game, "shrine")
+  if game.area == "forest" then enterArea(game, "shrine"); Save.write(game)
   elseif game.area == "shrine" then
-    if game.mireDead then enterArea(game, "mountain") else game.player.x = 1170; notify(game, "The Mire Priest's ward seals the mountain path.") end
+    if game.mireDead then enterArea(game, "mountain"); Save.write(game) else game.player.x = 1170; notify(game, "The Mire Priest's ward seals the mountain path.") end
   end
 end
 
@@ -92,8 +113,10 @@ function State.update(dt)
   AI.update(game.enemies, game.boss, p, game.projectiles, dt)
   Combat.update(game, dt)
   if game.boss and game.boss.dead then
-    if game.boss.kind == "mire_priest" and not game.mireDead then game.mireDead = true; notify(game, "Mire Priest slain — the mountain ward is broken.") end
-    if game.boss.kind == "lord_celium" then State.mode = "victory"; return end
+    if game.boss.kind == "mire_priest" and not game.mireDead then
+      game.mireDead = true; notify(game, "Mire Priest slain — the mountain ward is broken."); game.audio.play("boss"); Save.write(game)
+    end
+    if game.boss.kind == "lord_celium" then Save.clear(); game.audio.play("victory"); State.hasSave = false; State.mode = "victory"; return end
   end
   if p.hp <= 0 then State.mode = "dead"; return end
   updatePrompt(game); transition(game)
@@ -144,13 +167,31 @@ function State.draw()
 end
 
 function State.keypressed(key)
-  if key == "return" and (State.mode == "title" or State.mode == "dead" or State.mode == "victory") then State.game = newGame(); State.mode = "playing"; return end
+  if key == "return" and (State.mode == "title" or State.mode == "dead" or State.mode == "victory") then
+    Save.clear(); State.game = newGame(); State.hasSave = false; State.mode = "playing"; return
+  end
+  if key == "c" and State.mode == "title" and Save.exists() then State.game = newGame(Save.read()); State.mode = "playing"; return end
   if key == "escape" and (State.mode == "playing" or State.mode == "paused") then State.mode = State.mode == "playing" and "paused" or "playing"; return end
+  if key == "v" and State.mode == "paused" then Settings.cycleVolume(); return end
+  if key == "m" and State.mode == "paused" then Settings.toggleMute(); return end
   if State.mode ~= "playing" then return end
-  if key == "space" then Player.dash(State.game.player) end
+  if key == "space" then if Player.dash(State.game.player) then State.game.audio.play("dash") end end
   if key == "j" then Combat.melee(State.game) end
   if key == "k" then Combat.magic(State.game) end
   if key == "e" then interact(State.game) end
+end
+
+function State.gamepadpressed(_, button)
+  if button == "start" then
+    if State.mode == "title" or State.mode == "dead" or State.mode == "victory" then Save.clear(); State.game = newGame(); State.mode = "playing"
+    elseif State.mode == "playing" or State.mode == "paused" then State.mode = State.mode == "playing" and "paused" or "playing" end
+    return
+  end
+  if State.mode ~= "playing" then return end
+  if button == "a" then Combat.melee(State.game) end
+  if button == "x" then Combat.magic(State.game) end
+  if button == "b" and Player.dash(State.game.player) then State.game.audio.play("dash") end
+  if button == "y" then interact(State.game) end
 end
 
 function State.mousepressed(_, _, button)

@@ -11,3 +11,4 @@ The project uses small table-returning modules and one controlled state object. 
 
 Dependencies flow from state → world/entities/systems/UI → data/core helpers. Data never imports gameplay modules. Systems should not own rendering. No ECS or external library is planned for the MVP.
 
+`core/save` persists a small versioned checkpoint through `love.filesystem`; `core/settings` owns persisted audio preferences; `core/audio` generates short sound effects in memory. None requires bundled assets.

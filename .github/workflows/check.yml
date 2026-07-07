@@ -9,3 +9,5 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y lua5.4
       - name: Check Lua syntax
         run: make check
+      - name: Package game
+        run: make build

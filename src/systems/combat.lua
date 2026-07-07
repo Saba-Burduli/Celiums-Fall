@@ -15,6 +15,7 @@ function Combat.melee(game)
   local p = game.player
   if p.meleeTimer > 0 then return end
   p.meleeTimer, game.meleeFlash = .42, .12
+  if game.audio then game.audio.play("melee") end
   local targetX, targetY = p.x + p.aimX * 31, p.y + p.aimY * 31
   local hitPoint = { x = targetX, y = targetY, radius = 28 }
   for _, e in ipairs(game.enemies) do
@@ -27,11 +28,13 @@ function Combat.magic(game)
   local p = game.player
   if p.magicTimer > 0 or p.mana < 18 then return end
   p.magicTimer, p.mana = .32, p.mana - 18
+  if game.audio then game.audio.play("magic") end
   table.insert(game.projectiles, Projectile.new(p.x, p.y, p.aimX, p.aimY, "player", p.magicDamage, 430, { .55, .32, .92 }, 7))
 end
 
 function Combat.damageEnemy(game, e, amount)
   e.hp, e.flash = e.hp - amount, .1
+  if game.audio then game.audio.play("hit") end
   particles(game, e.x, e.y, e.color, 7); Camera.hit(3)
   if e.hp <= 0 then e.dead = true; particles(game, e.x, e.y, { .75, .1, .3 }, 13) end
 end
@@ -40,6 +43,7 @@ function Combat.damagePlayer(game, amount)
   local p = game.player
   if p.invulnerable > 0 then return end
   p.hp, p.invulnerable, p.flash = p.hp - amount, .65, .14
+  if game.audio then game.audio.play("hit") end
   particles(game, p.x, p.y, { .55, .2, .3 }, 9); Camera.hit(6)
 end
 
@@ -77,4 +81,3 @@ function Combat.update(game, dt)
 end
 
 return Combat
-

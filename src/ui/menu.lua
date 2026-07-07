@@ -18,7 +18,7 @@ function Menu.draw(mode)
   if mode == "title" then
     center("CELIUM'S FALL", 205, 54)
     love.graphics.setColor(.58, .52, .64); center("A dark fantasy action-adventure", 285, 20)
-    love.graphics.setColor(.84, .8, .88); center("Press Enter to begin", 410, 22)
+    love.graphics.setColor(.84, .8, .88); center("Enter: new journey    C: continue checkpoint", 410, 22)
     love.graphics.setColor(.45, .4, .5); center("WASD move  •  J melee  •  K magic  •  Space dash", 475, 15)
   elseif mode == "dead" then
     love.graphics.setColor(.65, .12, .2); center("AREN HAS FALLEN", 250, 45)
@@ -34,7 +34,7 @@ end
 function Menu.pause()
   love.graphics.setColor(0, 0, 0, .72); love.graphics.rectangle("fill", 0, 0, 1280, 720)
   love.graphics.setColor(.9, .85, .95); center("PAUSED", 285, 42)
-  love.graphics.setColor(.65, .6, .7); center("Esc to return", 355, 18)
+  love.graphics.setColor(.65, .6, .7); center("Esc to return  •  V volume  •  M mute", 355, 18)
 end
 
 return Menu

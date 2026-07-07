@@ -1,4 +1,4 @@
-.PHONY: run check
+.PHONY: run check build
 
 run:
 	love .
@@ -6,3 +6,5 @@ run:
 check:
 	./scripts/check.sh
 
+build:
+	./scripts/build.sh

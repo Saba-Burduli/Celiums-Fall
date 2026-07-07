@@ -12,11 +12,11 @@ Title → explore forest and fight → collect upgrades / complete moonstone que
 
 ## Controls
 
-WASD move; mouse/arrows aim; Space dash; J/left mouse melee; K/right mouse magic; E interact; Enter start/restart; Esc pause.
+WASD/left stick move; mouse/arrows/right stick aim; Space/B dash; J/left mouse/A melee; K/right mouse/X magic; E/Y interact; Enter/Start begin; Esc/Start pause; C continues a checkpoint; V/M controls volume while paused.
 
 ## Known limitations
 
-One handcrafted room per area, no saves/audio/gamepad, simple circle collision, fixed encounters, basic enemy separation, and minimal narrative text.
+One handcrafted room per area, simple circle collision, fixed encounters, basic enemy separation, procedural-only audio, checkpoint rather than full world persistence, and minimal narrative text.
 
 ## Next recommended tasks
 
@@ -34,4 +34,3 @@ One handcrafted room per area, no saves/audio/gamepad, simple circle collision, 
 - UI/dialogue: `src/ui/hud.lua`, `src/ui/dialogue.lua`, `src/ui/menu.lua`
 - State/transitions: `src/core/state.lua`
 - Quest/upgrades: `src/systems/quests.lua`, `src/systems/progression.lua`, `src/data/quests.lua`, `src/data/items.lua`
-

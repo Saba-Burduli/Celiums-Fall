@@ -9,8 +9,9 @@
 ## Next
 
 - [ ] Combat balance and accessibility playtest
-- [ ] Audio and settings
-- [ ] Save/checkpoint support
-- [ ] Gamepad support
+- [x] Audio and settings
+- [x] Save/checkpoint support
+- [x] Gamepad support
 - [ ] More rooms, enemy variants, and environmental hazards
-- [ ] Release packaging and screenshots
+- [x] Portable `.love` packaging
+- [ ] Platform-specific releases and screenshots
