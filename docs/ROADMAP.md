@@ -3,8 +3,8 @@
 ## MVP
 
 - [x] Repository and low-token documentation
-- [ ] Playable three-area combat loop
-- [ ] Bosses, stones, quest, victory/death
+- [x] Playable three-area combat loop
+- [x] Bosses, stones, quest, victory/death
 
 ## Next
 
@@ -14,4 +14,3 @@
 - [ ] Gamepad support
 - [ ] More rooms, enemy variants, and environmental hazards
 - [ ] Release packaging and screenshots
-

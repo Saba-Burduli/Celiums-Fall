@@ -3,4 +3,7 @@
 ## Unreleased
 
 - Initialized the LÖVE project, low-token agent guide, documentation, validation scripts, and CI.
-
+- Added the playable three-area progression from title screen to Lord Celium victory.
+- Added Aren's melee, magic, dash, health/mana, particles, and hit feedback.
+- Added three enemy archetypes, the Mire Priest and Lord Celium bosses, four upgrade stones, and the Old Villager quest.
+- Added HUD, boss bars, dialogue prompts, pause, death, and victory screens.

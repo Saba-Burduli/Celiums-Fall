@@ -1,0 +1,53 @@
+local Defs = require("src.data.bosses")
+local Utils = require("src.core.utils")
+local Projectile = require("src.entities.projectile")
+local Boss = {}
+
+function Boss.new(kind, x, y)
+  local d = Defs[kind]
+  return { kind = kind, name = d.name, x = x, y = y, hp = d.hp, maxHp = d.hp, speed = d.speed,
+    damage = d.damage, radius = d.radius, color = d.color, attackTimer = 1, baseCooldown = d.cooldown,
+    summonTimer = 5, chargeTimer = 4, flash = 0, dead = false, isBoss = true, phase = 1 }
+end
+
+local function radial(b, projectiles, count, speed)
+  for i = 1, count do
+    local angle = i / count * math.pi * 2
+    table.insert(projectiles, Projectile.new(b.x, b.y, math.cos(angle), math.sin(angle), "enemy", b.damage, speed, b.color, 7))
+  end
+end
+
+function Boss.update(b, player, projectiles, enemies, dt)
+  b.attackTimer, b.summonTimer, b.chargeTimer = b.attackTimer - dt, b.summonTimer - dt, b.chargeTimer - dt
+  b.flash = math.max(0, b.flash - dt)
+  if b.kind == "lord_celium" and b.hp < b.maxHp * .5 then b.phase = 2 end
+  local nx, ny = Utils.normalize(player.x - b.x, player.y - b.y)
+  local pace = b.phase == 2 and 1.35 or 1
+  b.x, b.y = b.x + nx * b.speed * pace * dt, b.y + ny * b.speed * pace * dt
+  if b.attackTimer <= 0 then
+    radial(b, projectiles, b.kind == "mire_priest" and 10 or (b.phase == 2 and 16 or 12), b.phase == 2 and 255 or 205)
+    b.attackTimer = b.baseCooldown / pace
+  end
+  if b.summonTimer <= 0 then
+    local Enemy = require("src.entities.enemy")
+    local kind = b.kind == "mire_priest" and "cursed_hound" or "shadow_thrall"
+    table.insert(enemies, Enemy.new(kind, b.x + 55, b.y + 20))
+    if b.phase == 2 then table.insert(enemies, Enemy.new("cursed_hound", b.x - 55, b.y - 20)) end
+    b.summonTimer = b.kind == "mire_priest" and 6 or 5
+  end
+  if b.kind == "lord_celium" and b.chargeTimer <= 0 then
+    b.x, b.y = Utils.clamp(b.x + nx * 145, 70, 1210), Utils.clamp(b.y + ny * 145, 100, 650)
+    b.chargeTimer = b.phase == 2 and 3 or 4.5
+  end
+end
+
+function Boss.draw(b)
+  love.graphics.setColor(b.flash > 0 and 1 or b.color[1], b.color[2], b.color[3])
+  love.graphics.circle("fill", b.x, b.y, b.radius)
+  love.graphics.setColor(.08, .04, .1)
+  love.graphics.polygon("fill", b.x - b.radius, b.y, b.x, b.y - b.radius * 1.5, b.x + b.radius, b.y)
+  love.graphics.setColor(b.color)
+  love.graphics.circle("line", b.x, b.y, b.radius + 10 + math.sin(love.timer.getTime() * 3) * 3)
+end
+
+return Boss
