@@ -118,6 +118,11 @@ function State.update(dt)
     end
     if game.boss.kind == "lord_celium" then Save.clear(); game.audio.play("victory"); State.hasSave = false; State.mode = "victory"; return end
   end
+  if game.boss and game.boss.phaseChanged then
+    game.boss.phaseChanged = false
+    notify(game, "Lord Celium tears open the veil — his final phase begins.")
+    game.audio.play("boss")
+  end
   if p.hp <= 0 then State.mode = "dead"; return end
   updatePrompt(game); transition(game)
   game.questObjective = Quests.objective(game.quest)
@@ -170,7 +175,9 @@ function State.keypressed(key)
   if key == "return" and (State.mode == "title" or State.mode == "dead" or State.mode == "victory") then
     Save.clear(); State.game = newGame(); State.hasSave = false; State.mode = "playing"; return
   end
-  if key == "c" and State.mode == "title" and Save.exists() then State.game = newGame(Save.read()); State.mode = "playing"; return end
+  if key == "c" and (State.mode == "title" or State.mode == "dead") and Save.exists() then
+    State.game = newGame(Save.read()); State.mode = "playing"; return
+  end
   if key == "escape" and (State.mode == "playing" or State.mode == "paused") then State.mode = State.mode == "playing" and "paused" or "playing"; return end
   if key == "v" and State.mode == "paused" then Settings.cycleVolume(); return end
   if key == "m" and State.mode == "paused" then Settings.toggleMute(); return end

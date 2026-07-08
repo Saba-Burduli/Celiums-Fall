@@ -20,10 +20,10 @@ One handcrafted room per area, simple circle collision, fixed encounters, basic 
 
 ## Next recommended tasks
 
-1. Playtest and tune boss damage/cooldowns.
-2. Add generated audio and volume controls.
-3. Add save/checkpoint support.
-4. Add gamepad bindings and accessibility options.
+1. Playtest full boss encounters and tune damage/cooldowns.
+2. Add another room or environmental hazard per area.
+3. Expand villager and boss narrative beats.
+4. Produce platform-specific fused releases.
 
 ## Read these files for X
 

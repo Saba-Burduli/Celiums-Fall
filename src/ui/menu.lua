@@ -22,7 +22,7 @@ function Menu.draw(mode)
     love.graphics.setColor(.45, .4, .5); center("WASD move  •  J melee  •  K magic  •  Space dash", 475, 15)
   elseif mode == "dead" then
     love.graphics.setColor(.65, .12, .2); center("AREN HAS FALLEN", 250, 45)
-    love.graphics.setColor(.82, .78, .84); center("Press Enter to defy the curse again", 370, 21)
+    love.graphics.setColor(.82, .78, .84); center("Enter: new journey    C: return to checkpoint", 370, 21)
   elseif mode == "victory" then
     love.graphics.setColor(.65, .78, .9); center("CELIUM IS FREE", 220, 48)
     love.graphics.setColor(.85, .8, .9); center("Lord Celium is dead. The old shadows loosen their hold.", 315, 21)

@@ -14,3 +14,5 @@
 - [x] Add combat feedback, HUD, dialogue, pause, death, and victory states.
 - [x] Add procedural audio, volume settings, checkpoint saves, and gamepad support.
 - [x] Add a portable `.love` package target.
+- [x] Telegraph Lord Celium's charge and cap boss summons.
+- [x] Allow checkpoint recovery directly from the death screen.
