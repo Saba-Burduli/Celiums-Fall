@@ -12,3 +12,8 @@
 - Added dual-stick gamepad controls and a portable `.love` build target.
 - Added a visible warning before Lord Celium's charge and capped boss summons to keep encounters fair.
 - Added death-screen checkpoint recovery and a clear final-phase announcement.
+- Expanded the route to six rooms with corrupted-ground hazards.
+- Added Shielded Knight, Rift Witch, and Winged Curse enemy behaviors.
+- Added Sillius's patrol quest, temporary companion support, and Chain Lightning.
+- Added original and Kenney CC0 sprite sets with live F2 comparison switching.
+- Added a repeatable `make smoke` runtime check for expanded content and asset loading.

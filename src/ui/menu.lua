@@ -19,7 +19,7 @@ function Menu.draw(mode)
     center("CELIUM'S FALL", 205, 54)
     love.graphics.setColor(.58, .52, .64); center("A dark fantasy action-adventure", 285, 20)
     love.graphics.setColor(.84, .8, .88); center("Enter: new journey    C: continue checkpoint", 410, 22)
-    love.graphics.setColor(.45, .4, .5); center("WASD move  •  J melee  •  K magic  •  Space dash", 475, 15)
+    love.graphics.setColor(.45, .4, .5); center("WASD move  •  J melee  •  K magic  •  L chain spell  •  F2 art set", 475, 15)
   elseif mode == "dead" then
     love.graphics.setColor(.65, .12, .2); center("AREN HAS FALLEN", 250, 45)
     love.graphics.setColor(.82, .78, .84); center("Enter: new journey    C: return to checkpoint", 370, 21)

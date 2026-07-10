@@ -6,7 +6,15 @@ local Enemy = {}
 function Enemy.new(kind, x, y)
   local d = Defs[kind]
   return { kind = kind, name = d.name, x = x, y = y, hp = d.hp, maxHp = d.hp, speed = d.speed,
-    damage = d.damage, radius = d.radius, color = d.color, behavior = d.kind, attackTimer = love.math.random() * 1.2, flash = 0, dead = false }
+    damage = d.damage, radius = d.radius, color = d.color, behavior = d.kind, attackTimer = love.math.random() * 1.2,
+    specialTimer = 1.8 + love.math.random(), hover = love.math.random() * 6, guard = d.kind == "shield", flash = 0, dead = false }
+end
+
+local function shootSpread(e, nx, ny, projectiles)
+  local base = math.atan2(ny, nx)
+  for _, offset in ipairs({ -.18, 0, .18 }) do
+    table.insert(projectiles, Projectile.new(e.x, e.y, math.cos(base + offset), math.sin(base + offset), "enemy", e.damage, 250, e.color, 6))
+  end
 end
 
 function Enemy.update(e, player, projectiles, dt)
@@ -14,7 +22,28 @@ function Enemy.update(e, player, projectiles, dt)
   local dx, dy = player.x - e.x, player.y - e.y
   local nx, ny = Utils.normalize(dx, dy)
   local dist = Utils.length(dx, dy)
-  if e.behavior == "ranged" then
+  e.specialTimer, e.hover = e.specialTimer - dt, e.hover + dt
+  if e.behavior == "shield" then
+    if e.specialTimer <= 0 then
+      e.guard = false
+      e.x, e.y = e.x + nx * e.speed * 2.8 * dt, e.y + ny * e.speed * 2.8 * dt
+      if e.specialTimer <= -.55 then e.specialTimer, e.guard = 2.5, true end
+    else
+      e.x, e.y = e.x + nx * e.speed * dt, e.y + ny * e.speed * dt
+    end
+  elseif e.behavior == "teleport" then
+    if e.specialTimer <= 0 then
+      local angle = love.math.random() * math.pi * 2
+      e.x, e.y = player.x + math.cos(angle) * 210, player.y + math.sin(angle) * 210
+      e.x, e.y = Utils.clamp(e.x, 70, 1210), Utils.clamp(e.y, 100, 650)
+      nx, ny = Utils.normalize(player.x - e.x, player.y - e.y)
+      shootSpread(e, nx, ny, projectiles)
+      e.specialTimer = 3.1
+    end
+  elseif e.behavior == "flying" then
+    local sway = math.sin(e.hover * 3) * 75
+    e.x, e.y = e.x + (nx * e.speed - ny * sway) * dt, e.y + (ny * e.speed + nx * sway) * dt
+  elseif e.behavior == "ranged" then
     if dist > 230 then e.x, e.y = e.x + nx * e.speed * dt, e.y + ny * e.speed * dt end
     if dist < 150 then e.x, e.y = e.x - nx * e.speed * dt, e.y - ny * e.speed * dt end
     if e.attackTimer == 0 and dist < 440 then
@@ -26,7 +55,8 @@ function Enemy.update(e, player, projectiles, dt)
   end
 end
 
-function Enemy.draw(e)
+function Enemy.draw(e, assets)
+  if assets and assets.draw(e.kind, e.x, e.y, e.kind == "winged_curse" and 2.4 or 2.1, e.flash) then return end
   love.graphics.setColor(e.flash > 0 and 1 or e.color[1], e.color[2], e.color[3])
   if e.kind == "cursed_hound" then
     love.graphics.polygon("fill", e.x - 16, e.y + 9, e.x + 18, e.y, e.x - 10, e.y - 10)
@@ -39,4 +69,3 @@ function Enemy.draw(e)
 end
 
 return Enemy
-

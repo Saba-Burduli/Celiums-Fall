@@ -5,11 +5,13 @@ local Player = {}
 function Player.new(x, y)
   return { name = "Aren", x = x, y = y, radius = 15, hp = 120, maxHp = 120, mana = 100, maxMana = 100,
     speed = 190, meleeDamage = 30, magicDamage = 27, aimX = 1, aimY = 0, meleeTimer = 0, magicTimer = 0,
-    dashTimer = 0, dashCooldown = 1.1, invulnerable = 0, flash = 0, stones = {}, questReward = false }
+    chainTimer = 0, chainUnlocked = false, dashTimer = 0, dashCooldown = 1.1, invulnerable = 0, flash = 0,
+    stones = {}, questReward = false }
 end
 
 function Player.update(p, dt)
   p.meleeTimer, p.magicTimer = math.max(0, p.meleeTimer - dt), math.max(0, p.magicTimer - dt)
+  p.chainTimer = math.max(0, p.chainTimer - dt)
   p.dashTimer, p.invulnerable, p.flash = math.max(0, p.dashTimer - dt), math.max(0, p.invulnerable - dt), math.max(0, p.flash - dt)
   p.mana = math.min(p.maxMana, p.mana + 13 * dt)
   local mx, my = Input.move()
@@ -26,7 +28,8 @@ function Player.dash(p)
   return true
 end
 
-function Player.draw(p)
+function Player.draw(p, assets)
+  if assets and assets.draw("player", p.x, p.y, 2.2, p.flash) then return end
   local flash = p.flash > 0 and 1 or 0
   love.graphics.setColor(0.28 + flash * .5, 0.67, 0.86)
   love.graphics.circle("fill", p.x, p.y, p.radius)
@@ -37,4 +40,3 @@ function Player.draw(p)
 end
 
 return Player
-

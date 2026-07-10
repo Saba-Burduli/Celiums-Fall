@@ -59,11 +59,14 @@ function Boss.update(b, player, projectiles, enemies, dt)
   end
 end
 
-function Boss.draw(b)
+function Boss.draw(b, assets)
+  if assets then assets.draw(b.kind, b.x, b.y, b.kind == "lord_celium" and 4.6 or 3.8, b.flash) end
+  if not assets then
   love.graphics.setColor(b.flash > 0 and 1 or b.color[1], b.color[2], b.color[3])
   love.graphics.circle("fill", b.x, b.y, b.radius)
   love.graphics.setColor(.08, .04, .1)
   love.graphics.polygon("fill", b.x - b.radius, b.y, b.x, b.y - b.radius * 1.5, b.x + b.radius, b.y)
+  end
   love.graphics.setColor(b.color)
   love.graphics.circle("line", b.x, b.y, b.radius + 10 + math.sin(love.timer.getTime() * 3) * 3)
   if b.chargeWindup > 0 then

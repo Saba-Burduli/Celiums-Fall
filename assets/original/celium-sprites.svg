@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="16" viewBox="0 0 192 16" shape-rendering="crispEdges">
+  <!-- Aren -->
+  <g transform="translate(0)"><path fill="#15101f" d="M5 1h6v2h2v4h2v8H1V7h2V3h2z"/><path fill="#6ec5db" d="M6 2h4v3h2v4H4V5h2z"/><path fill="#553172" d="M4 9h8l2 6H2z"/><path fill="#d9b8ee" d="M7 5h2v2H7z"/></g>
+  <!-- Shadow Thrall -->
+  <g transform="translate(16)"><path fill="#100e16" d="M4 1h8v2h2v12H2V3h2z"/><path fill="#443651" d="M5 3h6v5H5zM3 9h10v6H3z"/><path fill="#c65470" d="M6 5h1v1H6zm3 0h1v1H9z"/></g>
+  <!-- Cursed Hound -->
+  <g transform="translate(32)"><path fill="#170b0e" d="M1 6h3V3h2v2h6l3 3-2 5H4l-3-2z"/><path fill="#8b3035" d="M3 7h9l2 2-2 2H4z"/><path fill="#e07b57" d="M11 7h1v1h-1z"/><path fill="#42181d" d="M4 12h2v3H4zm6 0h2v3h-2z"/></g>
+  <!-- Ash Cultist -->
+  <g transform="translate(48)"><path fill="#171311" d="M4 1h8v2h2v12H2V3h2z"/><path fill="#806b4e" d="M5 3h6v5H5zM3 9h10v6H3z"/><path fill="#d9c79d" d="M7 5h2v2H7z"/><path fill="#42372c" d="M5 1h6v2H5z"/></g>
+  <!-- Shielded Knight -->
+  <g transform="translate(64)"><path fill="#10141c" d="M4 1h8v3h2v11H2V4h2z"/><path fill="#7b899e" d="M5 2h6v5H5zM3 8h8v7H3z"/><path fill="#b8c4d2" d="M6 4h4v1H6z"/><path fill="#37465b" d="M11 7h4v7h-4z"/><path fill="#d04b4b" d="M7 9h2v4H7z"/></g>
+  <!-- Rift Witch -->
+  <g transform="translate(80)"><path fill="#170d20" d="M7 0h3l5 5h-3v3h2v7H2V8h2V5H1z"/><path fill="#8f4cb2" d="M7 2h2l3 3H4zM4 9h8l1 6H3z"/><path fill="#d5a6ed" d="M6 6h4v2H6z"/><path fill="#4cf0d0" d="M7 6h1v1H7z"/></g>
+  <!-- Winged Curse -->
+  <g transform="translate(96)"><path fill="#0e1420" d="M6 4h4v2h2V3h3v7h-4v4H5v-4H1V3h3v3h2z"/><path fill="#4889a8" d="M7 5h2v2h2v3H9v3H7v-3H5V7h2z"/><path fill="#9be3e8" d="M7 7h2v2H7z"/></g>
+  <!-- Sillius -->
+  <g transform="translate(112)"><path fill="#11131c" d="M4 1h8v2h2v12H2V3h2z"/><path fill="#b5a8cf" d="M5 3h6v5H5z"/><path fill="#293955" d="M3 9h10v6H3z"/><path fill="#ece0c9" d="M6 5h4v3H6z"/><path fill="#5ce0e6" d="M11 10h3v2h-3z"/></g>
+  <!-- Mire Priest -->
+  <g transform="translate(128)"><path fill="#0b1711" d="M5 0h6v2h2v3h2v10H1V5h2V2h2z"/><path fill="#39784c" d="M5 2h6v5H5zM3 8h10l1 7H2z"/><path fill="#9bc46e" d="M6 4h4v2H6z"/><path fill="#152d21" d="M7 4h2v1H7z"/></g>
+  <!-- Lord Celium -->
+  <g transform="translate(144)"><path fill="#190614" d="M3 2h3V0h2v3h1V0h2v2h2v3h2v10H1V5h2z"/><path fill="#8e204f" d="M4 3h8v5h2v7H2V8h2z"/><path fill="#f04d71" d="M6 5h1v2H6zm3 0h1v2H9z"/><path fill="#3b102f" d="M5 9h6v6H5z"/></g>
+  <!-- Stone -->
+  <g transform="translate(160)"><path fill="#24162f" d="M7 1h3l4 5-3 8H5L2 6z"/><path fill="#9b62e0" d="M7 3h2l3 4-2 5H6L4 7z"/><path fill="#e0c4ff" d="M7 4h2v4H7z"/></g>
+  <!-- Villager -->
+  <g transform="translate(176)"><path fill="#1c1512" d="M5 1h6v2h2v12H3V3h2z"/><path fill="#c59a75" d="M6 3h4v5H6z"/><path fill="#6f5745" d="M4 9h8v6H4z"/><path fill="#e2c0a0" d="M7 5h2v2H7z"/></g>
+</svg>

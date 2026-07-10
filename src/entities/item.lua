@@ -6,15 +6,16 @@ function Item.new(kind, x, y, questItem)
 end
 
 function Item.update(item, dt) item.pulse = item.pulse + dt end
-function Item.draw(item)
+function Item.draw(item, assets)
   if item.collected then return end
   local def = Items[item.kind]
   local r = item.radius + math.sin(item.pulse * 3) * 2
   love.graphics.setColor(def.color[1], def.color[2], def.color[3], 0.18)
   love.graphics.circle("fill", item.x, item.y, r * 2)
   love.graphics.setColor(def.color)
-  love.graphics.polygon("fill", item.x, item.y - r, item.x + r * .75, item.y, item.x, item.y + r, item.x - r * .75, item.y)
+  if not assets or not assets.draw("stone", item.x, item.y, 1.7) then
+    love.graphics.polygon("fill", item.x, item.y - r, item.x + r * .75, item.y, item.x, item.y + r, item.x - r * .75, item.y)
+  end
 end
 
 return Item
-

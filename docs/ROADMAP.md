@@ -12,6 +12,7 @@
 - [x] Audio and settings
 - [x] Save/checkpoint support
 - [x] Gamepad support
-- [ ] More rooms, enemy variants, and environmental hazards
+- [x] More rooms, enemy variants, and environmental hazards
 - [x] Portable `.love` packaging
 - [ ] Platform-specific releases and screenshots
+- [ ] Full 15-minute balance and accessibility playtest

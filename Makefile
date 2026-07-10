@@ -1,4 +1,4 @@
-.PHONY: run check build
+.PHONY: run check build smoke
 
 run:
 	love .
@@ -8,3 +8,6 @@ check:
 
 build:
 	./scripts/build.sh
+
+smoke:
+	love . --smoke

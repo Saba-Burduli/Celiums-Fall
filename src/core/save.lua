@@ -12,6 +12,7 @@ function Save.write(game)
     "mana=" .. math.floor(p.mana), "maxMana=" .. p.maxMana, "speed=" .. p.speed,
     "magicDamage=" .. p.magicDamage, "dashCooldown=" .. p.dashCooldown, "stones=" .. table.concat(stones, ","),
     "quest=" .. game.quest.status, "questReward=" .. tostring(p.questReward), "mireDead=" .. tostring(game.mireDead),
+    "sillius=" .. game.companion.status, "chainUnlocked=" .. tostring(p.chainUnlocked),
   }
   love.filesystem.write(path, table.concat(fields, "\n") .. "\n")
 end
@@ -30,4 +31,3 @@ end
 function Save.clear() if Save.exists() then love.filesystem.remove(path) end end
 
 return Save
-

@@ -15,11 +15,26 @@ local Menu = require("src.ui.menu")
 local Audio = require("src.core.audio")
 local Save = require("src.core.save")
 local Settings = require("src.core.settings")
+local Assets = require("src.core.assets")
+local Companion = require("src.entities.companion")
 
 local State = { mode = "title" }
 
 local function notify(game, text)
   game.message, game.messageTimer = text, 3.2
+end
+
+local function aliveEnemies(game)
+  local count = 0
+  for _, enemy in ipairs(game.enemies) do if not enemy.dead then count = count + 1 end end
+  return count
+end
+
+local function currentObjective(game)
+  if game.companion.status == "active" then return "Sillius: eliminate the faction patrol." end
+  if game.companion.status == "ready" then return "Return to Sillius in the Forest Depths." end
+  if game.companion.status == "unmet" and game.area == "forest_depths" then return "Speak with the stranded faction occultist." end
+  return Quests.objective(game.quest)
 end
 
 local function enterArea(game, name)
@@ -31,6 +46,7 @@ local function enterArea(game, name)
   game.enemies, game.boss, game.items = Spawner.forArea(name, flags)
   game.projectiles = {}
   game.player.x, game.player.y = game.level.entry[1], game.level.entry[2]
+  if game.companion.status == "allied" then game.companion.x, game.companion.y = game.player.x - 35, game.player.y + 35 end
   notify(game, game.level.name)
 end
 
@@ -42,13 +58,16 @@ local function applySave(game, saved)
   p.speed, p.magicDamage = tonumber(saved.speed) or p.speed, tonumber(saved.magicDamage) or p.magicDamage
   p.dashCooldown = tonumber(saved.dashCooldown) or p.dashCooldown
   p.questReward, game.mireDead = saved.questReward == "true", saved.mireDead == "true"
+  p.chainUnlocked = saved.chainUnlocked == "true"
   game.quest.status = saved.quest or game.quest.status
+  game.companion.status = saved.sillius or game.companion.status
   for kind in (saved.stones or ""):gmatch("[^,]+") do p.stones[kind] = true end
 end
 
 local function newGame(saved)
   local game = {
-    player = Player.new(95, 360), projectiles = {}, particles = {}, quest = Quests.new(), mireDead = false,
+    player = Player.new(95, 360), projectiles = {}, particles = {}, lightning = {}, quest = Quests.new(),
+    companion = Companion.new(), mireDead = false,
     message = nil, messageTimer = 0, meleeFlash = 0, prompt = nil,
     questObjective = "",
     fonts = { small = love.graphics.newFont(15), normal = love.graphics.newFont(18) },
@@ -61,12 +80,28 @@ local function newGame(saved)
 end
 
 function State.load()
-  Settings.load(); Audio.load()
+  Settings.load(); Audio.load(); Assets.load()
   State.mode, State.hasSave = "title", Save.exists()
 end
 
 local function interact(game)
   local p = game.player
+  if Companion.present(game.companion, game.area) and Collision.near(p, game.companion, 65) then
+    local s = game.companion
+    if s.status == "unmet" then
+      s.status = "active"
+      notify(game, "Sillius: Still saving strangers, Aren? Kill this patrol and I'll make myself useful.")
+    elseif s.status == "active" and aliveEnemies(game) > 0 then
+      notify(game, "Sillius: The sarcastic reunion can continue after the screaming stops.")
+    elseif s.status == "active" or s.status == "ready" then
+      s.status, p.chainUnlocked = "allied", true
+      notify(game, "Sillius joins you. Chain Lightning unlocked [L]. Try not to look impressed.")
+      game.audio.play("stone")
+    else
+      notify(game, "Sillius: Lead on. I promise to criticize your technique quietly.")
+    end
+    Save.write(game); return
+  end
   if game.area == "forest" and Collision.near(p, { x = 175, y = 360 }, 65) then
     notify(game, Quests.interact(game.quest, p)); Save.write(game); return
   end
@@ -87,6 +122,9 @@ end
 
 local function updatePrompt(game)
   game.prompt = nil
+  if Companion.present(game.companion, game.area) and Collision.near(game.player, game.companion, 65) then
+    game.prompt = game.companion.status == "allied" and "Speak with Sillius" or "Ask Sillius about the patrol"
+  end
   if game.area == "forest" and Collision.near(game.player, { x = 175, y = 360 }, 65) then game.prompt = "Speak with Old Villager" end
   for _, item in ipairs(game.items) do
     if not item.collected and Collision.near(game.player, item, 45) then game.prompt = item.questItem and "Take lost moonstone" or "Absorb stone" end
@@ -96,10 +134,14 @@ end
 local function transition(game)
   local exit = game.level.exit
   if not exit or not Collision.near(game.player, exit, 45) then return end
-  if game.area == "forest" then enterArea(game, "shrine"); Save.write(game)
-  elseif game.area == "shrine" then
-    if game.mireDead then enterArea(game, "mountain"); Save.write(game) else game.player.x = 1170; notify(game, "The Mire Priest's ward seals the mountain path.") end
+  if game.area == "forest_depths" and game.companion.status == "active" and aliveEnemies(game) == 0 then game.companion.status = "ready" end
+  if game.area == "forest_depths" and game.companion.status ~= "allied" then
+    game.player.x = 1170; notify(game, "Sillius: Leaving already? The patrol still owns this road."); return
   end
+  if game.area == "shrine" and not game.mireDead then
+    game.player.x = 1170; notify(game, "The Mire Priest's ward seals the crypt."); return
+  end
+  if game.level.next then enterArea(game, game.level.next); Save.write(game) end
 end
 
 function State.update(dt)
@@ -111,6 +153,8 @@ function State.update(dt)
   if game.messageTimer == 0 then game.message = nil end
   for _, item in ipairs(game.items) do Item.update(item, dt) end
   AI.update(game.enemies, game.boss, p, game.projectiles, dt)
+  if game.companion.status == "active" and game.area == "forest_depths" and aliveEnemies(game) == 0 then game.companion.status = "ready" end
+  Companion.update(game.companion, game, dt)
   Combat.update(game, dt)
   if game.boss and game.boss.dead then
     if game.boss.kind == "mire_priest" and not game.mireDead then
@@ -125,7 +169,7 @@ function State.update(dt)
   end
   if p.hp <= 0 then State.mode = "dead"; return end
   updatePrompt(game); transition(game)
-  game.questObjective = Quests.objective(game.quest)
+  game.questObjective = currentObjective(game)
 end
 
 local function drawWorld(game)
@@ -136,6 +180,11 @@ local function drawWorld(game)
     love.graphics.rectangle("fill", tree[1] - 6, tree[2], 12, tree[3] + 18); love.graphics.setColor(game.level.accent)
   end
   love.graphics.setColor(.22, .2, .25, .5); love.graphics.rectangle("line", 24, 50, 1232, 646)
+  for _, hazard in ipairs(game.level.hazards or {}) do
+    love.graphics.setColor(.48, .08, .3, .2 + math.sin(love.timer.getTime() * 4) * .08)
+    love.graphics.circle("fill", hazard.x, hazard.y, hazard.radius)
+    love.graphics.setColor(.8, .2, .45, .7); love.graphics.circle("line", hazard.x, hazard.y, hazard.radius)
+  end
   if game.level.exit then
     local open = game.area ~= "shrine" or game.mireDead
     love.graphics.setColor(open and { .35, .42, .58, .7 } or { .45, .08, .16, .8 })
@@ -144,19 +193,25 @@ local function drawWorld(game)
     love.graphics.setColor(.7, .68, .76); love.graphics.print(game.level.exit.label, 0, 0); love.graphics.pop()
   end
   if game.area == "forest" then
-    love.graphics.setColor(.48, .4, .32); love.graphics.circle("fill", 175, 360, 17)
+    if not Assets.draw("villager", 175, 360, 2.1) then love.graphics.setColor(.48, .4, .32); love.graphics.circle("fill", 175, 360, 17) end
     love.graphics.setColor(.7, .65, .6); love.graphics.print("Old Villager", 128, 388)
   end
-  for _, item in ipairs(game.items) do Item.draw(item) end
+  if Companion.present(game.companion, game.area) then Companion.draw(game.companion, Assets) end
+  for _, item in ipairs(game.items) do Item.draw(item, Assets) end
   for _, shot in ipairs(game.projectiles) do Projectile.draw(shot) end
-  for _, enemy in ipairs(game.enemies) do if not enemy.dead then require("src.entities.enemy").draw(enemy) end end
-  if game.boss and not game.boss.dead then require("src.entities.boss").draw(game.boss) end
-  Player.draw(game.player)
+  for _, enemy in ipairs(game.enemies) do if not enemy.dead then require("src.entities.enemy").draw(enemy, Assets) end end
+  if game.boss and not game.boss.dead then require("src.entities.boss").draw(game.boss, Assets) end
+  Player.draw(game.player, Assets)
   if game.meleeFlash > 0 then
     local p = game.player; love.graphics.setColor(.8, .65, .95, .5)
     love.graphics.arc("line", "open", p.x, p.y, 45, math.atan2(p.aimY, p.aimX) - .8, math.atan2(p.aimY, p.aimX) + .8)
   end
   for _, q in ipairs(game.particles) do love.graphics.setColor(q.color[1], q.color[2], q.color[3], q.life / .35); love.graphics.circle("fill", q.x, q.y, 3) end
+  for _, bolt in ipairs(game.lightning) do
+    love.graphics.setColor(.5, .9, 1, math.min(1, bolt.life * 8)); love.graphics.setLineWidth(4)
+    love.graphics.line(bolt.x1, bolt.y1, (bolt.x1 + bolt.x2) / 2 + love.math.random(-8, 8), (bolt.y1 + bolt.y2) / 2 + love.math.random(-8, 8), bolt.x2, bolt.y2)
+    love.graphics.setLineWidth(1)
+  end
   love.graphics.setColor(.12, .1, .16, .13)
   for i = 1, 16 do love.graphics.circle("fill", (i * 97 + love.timer.getTime() * 7) % 1280, (i * 173) % 720, 45 + i % 3 * 20) end
 end
@@ -182,9 +237,11 @@ function State.keypressed(key)
   if key == "v" and State.mode == "paused" then Settings.cycleVolume(); return end
   if key == "m" and State.mode == "paused" then Settings.toggleMute(); return end
   if State.mode ~= "playing" then return end
+  if key == "f2" then notify(State.game, "Asset set: " .. Assets.toggle()); return end
   if key == "space" then if Player.dash(State.game.player) then State.game.audio.play("dash") end end
   if key == "j" then Combat.melee(State.game) end
   if key == "k" then Combat.magic(State.game) end
+  if key == "l" then Combat.chainLightning(State.game) end
   if key == "e" then interact(State.game) end
 end
 
@@ -197,6 +254,7 @@ function State.gamepadpressed(_, button)
   if State.mode ~= "playing" then return end
   if button == "a" then Combat.melee(State.game) end
   if button == "x" then Combat.magic(State.game) end
+  if button == "rightshoulder" then Combat.chainLightning(State.game) end
   if button == "b" and Player.dash(State.game.player) then State.game.audio.play("dash") end
   if button == "y" then interact(State.game) end
 end
@@ -205,6 +263,27 @@ function State.mousepressed(_, _, button)
   if State.mode ~= "playing" then return end
   if button == 1 then Combat.melee(State.game) end
   if button == 2 then Combat.magic(State.game) end
+end
+
+function State.smokeTest()
+  local game = newGame()
+  local rooms = { "forest", "forest_depths", "shrine", "shrine_crypt", "mountain_path", "mountain" }
+  for _, room in ipairs(rooms) do
+    enterArea(game, room)
+    assert(game.level and game.level.name, "missing room: " .. room)
+    assert(game.enemies and game.items, "missing encounter data: " .. room)
+  end
+  local original = Assets.current
+  Assets.toggle(); Assets.toggle()
+  assert(Assets.current == original, "asset set toggle did not round-trip")
+  game.companion.status, game.player.chainUnlocked = "allied", true
+  enterArea(game, "forest_depths")
+  assert(Companion.present(game.companion, game.area), "Sillius should be present")
+  game.player.x, game.player.y, game.player.aimX, game.player.aimY = 400, 250, 1, 0
+  assert(Combat.chainLightning(game), "chain lightning did not acquire patrol target")
+  AI.update(game.enemies, game.boss, game.player, game.projectiles, .016)
+  Combat.update(game, .016)
+  print("Celium's Fall smoke test passed: 6 rooms, 2 art sets, Sillius, Chain Lightning")
 end
 
 return State

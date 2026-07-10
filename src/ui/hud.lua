@@ -1,4 +1,5 @@
 local Progression = require("src.systems.progression")
+local Assets = require("src.core.assets")
 local Hud = {}
 
 local function bar(x, y, w, h, value, maxValue, color)
@@ -15,8 +16,13 @@ function Hud.draw(game)
   love.graphics.setColor(.86, .82, .9)
   love.graphics.print(math.ceil(p.hp) .. "/" .. p.maxHp, 285, 42)
   love.graphics.print("Stones " .. Progression.count(p) .. "/4", 24, 90)
+  if p.chainUnlocked then
+    love.graphics.setColor(p.chainTimer == 0 and { .45, .9, 1 } or { .45, .48, .55 })
+    love.graphics.print(p.chainTimer == 0 and "Chain Lightning [L] READY" or ("Chain Lightning %.1fs"):format(p.chainTimer), 24, 112)
+  end
   love.graphics.printf(game.level.name, 900, 20, 350, "right")
   love.graphics.setColor(.65, .61, .7); love.graphics.printf(game.questObjective, 720, 48, 530, "right")
+  love.graphics.setColor(.46, .43, .52); love.graphics.printf("Art: " .. Assets.current .. " [F2]", 900, 75, 350, "right")
   if game.boss and not game.boss.dead then
     love.graphics.setColor(.92, .82, .9); love.graphics.printf(game.boss.name .. (game.boss.phase == 2 and " — ASCENDANT" or ""), 390, 620, 500, "center")
     bar(390, 646, 500, 18, game.boss.hp, game.boss.maxHp, { .48, .08, .24 })
@@ -27,4 +33,3 @@ function Hud.draw(game)
 end
 
 return Hud
-

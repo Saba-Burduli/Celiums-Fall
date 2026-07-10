@@ -3,7 +3,7 @@
 ## Next
 
 - [ ] Playtest boss balance in LÖVE.
-- [ ] Add more rooms and narrative encounters.
+- [ ] Playtest and tune the expanded 15-minute route.
 - [ ] Produce platform-specific fused executables for release.
 
 ## Done
@@ -16,3 +16,8 @@
 - [x] Add a portable `.love` package target.
 - [x] Telegraph Lord Celium's charge and cap boss summons.
 - [x] Allow checkpoint recovery directly from the death screen.
+- [x] Add Forest Depths, Shrine Crypt, and Mountain Path rooms with hazards.
+- [x] Add Shielded Knight, Rift Witch, and Winged Curse enemies.
+- [x] Add Sillius's patrol quest, temporary companion behavior, and Chain Lightning.
+- [x] Add original and curated CC0 16-bit sprite sets with F2 switching.
+- [x] Add automated LÖVE smoke coverage for rooms, assets, Sillius, and Chain Lightning.
