@@ -1,6 +1,6 @@
 # Celium's Fall
 
-A small top-down dark fantasy action-adventure built with LÖVE. Aren, a former occult servant, turns corrupted magic against Lord Celium and the faction hunting him. This repository contains an asset-free playable vertical slice built from primitive graphics.
+A side-view dark fantasy action-platformer built with LÖVE. Aren, a former occult servant, jumps and fights across cursed forests, ruined churches, crypts, and Black Mountain while turning corrupted magic against Lord Celium's faction.
 
 ## Install and run
 
@@ -16,23 +16,24 @@ No external assets or Lua packages are required. To publish later, add a remote 
 
 ## Controls
 
-- WASD: move
+- A / D or left stick: move
+- W / Up / Space or gamepad A: jump
 - Mouse or arrow keys: aim
-- J / left mouse: melee
-- K / right mouse: magic projectile
+- J / left mouse / gamepad X: melee
+- K / right mouse / gamepad Y: magic projectile
 - L / right shoulder: chain lightning after Sillius unlocks it
-- Space: dash
-- E: interact / collect
+- Shift / gamepad B: dash
+- E / left shoulder: interact / collect
 - Enter: start / confirm / restart
 - Esc: pause
 - C on title: continue saved checkpoint
 - V / M while paused: cycle volume / mute
-- F2: switch instantly between original and curated 16-bit pixel-art sets
-- Gamepad: left stick move, right stick aim, A melee, X magic, B dash, Y interact, Start pause
+- Gamepad: left stick move, right stick aim, A jump, X melee, Y magic, B dash, Start pause
 
 ## MVP features
 
 - Title, play, pause, death, restart, and victory states
+- Side-view platforming with gravity, coyote-time jumping, one-way platforms, and aerial combat
 - Three connected areas: Cursed Forest, Ruined Shrine, Black Mountain
 - Six rooms across the forest, shrine, and mountain route
 - Aren movement, dash, melee, magic, health, and mana
@@ -40,10 +41,11 @@ No external assets or Lua packages are required. To publish later, add a remote 
 - Shielded Knight, Rift Witch, and Winged Curse enemy archetypes
 - Four permanent stone upgrades and a moonstone side quest
 - HUD, dialogue prompts, boss health bar, particles, hit flashes, and camera shake
-- Generated primitive art; no missing asset dependency
+- 640×360 pixel-native rendering with nearest-neighbor scaling
+- GothicVania Church environment, animated character, enemy, and magic assets
 - Procedural sound effects, persisted settings/checkpoints, and gamepad controls
 - Sillius ally quest, temporary companion combat, and chain-lightning unlock
-- Two hot-swappable 16-bit pixel-art sets: original Celium sprites and Kenney Tiny Dungeon CC0 assets
+- Original Celium and Kenney Tiny Dungeon sprites remain as fallback assets
 
 ## Build
 

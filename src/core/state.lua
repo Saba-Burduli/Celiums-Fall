@@ -46,7 +46,7 @@ local function enterArea(game, name)
   game.enemies, game.boss, game.items = Spawner.forArea(name, flags)
   game.projectiles = {}
   game.player.x, game.player.y = game.level.entry[1], game.level.entry[2]
-  if game.companion.status == "allied" then game.companion.x, game.companion.y = game.player.x - 35, game.player.y + 35 end
+  if game.companion.status == "allied" then game.companion.x, game.companion.y = game.player.x - 35, game.player.y end
   notify(game, game.level.name)
 end
 
@@ -70,7 +70,7 @@ local function newGame(saved)
     companion = Companion.new(), mireDead = false,
     message = nil, messageTimer = 0, meleeFlash = 0, prompt = nil,
     questObjective = "",
-    fonts = { small = love.graphics.newFont(15), normal = love.graphics.newFont(18) },
+    fonts = { small = love.graphics.newFont("assets/fonts/kenpixel-square.ttf", 16), normal = love.graphics.newFont("assets/fonts/kenpixel-square.ttf", 20) },
     audio = Audio,
   }
   applySave(game, saved)
@@ -102,7 +102,7 @@ local function interact(game)
     end
     Save.write(game); return
   end
-  if game.area == "forest" and Collision.near(p, { x = 175, y = 360 }, 65) then
+  if game.area == "forest" and Collision.near(p, { x = 175, y = 600 }, 65) then
     notify(game, Quests.interact(game.quest, p)); Save.write(game); return
   end
   for _, item in ipairs(game.items) do
@@ -125,7 +125,7 @@ local function updatePrompt(game)
   if Companion.present(game.companion, game.area) and Collision.near(game.player, game.companion, 65) then
     game.prompt = game.companion.status == "allied" and "Speak with Sillius" or "Ask Sillius about the patrol"
   end
-  if game.area == "forest" and Collision.near(game.player, { x = 175, y = 360 }, 65) then game.prompt = "Speak with Old Villager" end
+  if game.area == "forest" and Collision.near(game.player, { x = 175, y = 600 }, 65) then game.prompt = "Speak with Old Villager" end
   for _, item in ipairs(game.items) do
     if not item.collected and Collision.near(game.player, item, 45) then game.prompt = item.questItem and "Take lost moonstone" or "Absorb stone" end
   end
@@ -147,12 +147,12 @@ end
 function State.update(dt)
   if State.mode ~= "playing" then return end
   local game, p = State.game, State.game.player
-  Player.update(p, dt); Camera.update(dt)
+  Player.update(p, game.level, dt); Camera.update(dt)
   game.meleeFlash = math.max(0, game.meleeFlash - dt)
   game.messageTimer = math.max(0, game.messageTimer - dt)
   if game.messageTimer == 0 then game.message = nil end
   for _, item in ipairs(game.items) do Item.update(item, dt) end
-  AI.update(game.enemies, game.boss, p, game.projectiles, dt)
+  AI.update(game.enemies, game.boss, p, game.projectiles, game.level, dt)
   if game.companion.status == "active" and game.area == "forest_depths" and aliveEnemies(game) == 0 then game.companion.status = "ready" end
   Companion.update(game.companion, game, dt)
   Combat.update(game, dt)
@@ -173,32 +173,27 @@ function State.update(dt)
 end
 
 local function drawWorld(game)
-  love.graphics.clear(game.level.background)
-  love.graphics.setColor(game.level.accent)
-  for _, tree in ipairs(game.level.trees) do
-    love.graphics.circle("fill", tree[1], tree[2], tree[3]); love.graphics.setColor(game.level.accent[1] * .6, game.level.accent[2] * .6, game.level.accent[3] * .6)
-    love.graphics.rectangle("fill", tree[1] - 6, tree[2], 12, tree[3] + 18); love.graphics.setColor(game.level.accent)
-  end
-  love.graphics.setColor(.22, .2, .25, .5); love.graphics.rectangle("line", 24, 50, 1232, 646)
+  Assets.drawBackdrop(game.level)
+  Assets.drawPlatforms(game.level)
   for _, hazard in ipairs(game.level.hazards or {}) do
-    love.graphics.setColor(.48, .08, .3, .2 + math.sin(love.timer.getTime() * 4) * .08)
+    love.graphics.setColor(.65, .04, .18, .25 + math.sin(love.timer.getTime() * 4) * .08)
     love.graphics.circle("fill", hazard.x, hazard.y, hazard.radius)
-    love.graphics.setColor(.8, .2, .45, .7); love.graphics.circle("line", hazard.x, hazard.y, hazard.radius)
+    love.graphics.setColor(.95, .18, .28, .8); love.graphics.circle("line", hazard.x, hazard.y, hazard.radius)
   end
   if game.level.exit then
     local open = game.area ~= "shrine" or game.mireDead
     love.graphics.setColor(open and { .35, .42, .58, .7 } or { .45, .08, .16, .8 })
-    love.graphics.rectangle("fill", 1215, 305, 35, 110)
-    love.graphics.push(); love.graphics.translate(1202, 425); love.graphics.rotate(-math.pi / 2)
+    love.graphics.rectangle("fill", 1215, 510, 35, 122)
+    love.graphics.push(); love.graphics.translate(1202, 615); love.graphics.rotate(-math.pi / 2)
     love.graphics.setColor(.7, .68, .76); love.graphics.print(game.level.exit.label, 0, 0); love.graphics.pop()
   end
   if game.area == "forest" then
-    if not Assets.draw("villager", 175, 360, 2.1) then love.graphics.setColor(.48, .4, .32); love.graphics.circle("fill", 175, 360, 17) end
-    love.graphics.setColor(.7, .65, .6); love.graphics.print("Old Villager", 128, 388)
+    if not Assets.draw("villager", 175, 600, 1.1) then love.graphics.setColor(.48, .4, .32); love.graphics.circle("fill", 175, 600, 17) end
+    love.graphics.setColor(.7, .65, .6); love.graphics.print("Old Villager", 128, 565)
   end
   if Companion.present(game.companion, game.area) then Companion.draw(game.companion, Assets) end
   for _, item in ipairs(game.items) do Item.draw(item, Assets) end
-  for _, shot in ipairs(game.projectiles) do Projectile.draw(shot) end
+  for _, shot in ipairs(game.projectiles) do Projectile.draw(shot, Assets) end
   for _, enemy in ipairs(game.enemies) do if not enemy.dead then require("src.entities.enemy").draw(enemy, Assets) end end
   if game.boss and not game.boss.dead then require("src.entities.boss").draw(game.boss, Assets) end
   Player.draw(game.player, Assets)
@@ -217,8 +212,10 @@ local function drawWorld(game)
 end
 
 function State.draw()
-  if State.mode == "title" or State.mode == "dead" or State.mode == "victory" then Menu.draw(State.mode); return end
   Camera.beginDraw()
+  if State.mode == "title" or State.mode == "dead" or State.mode == "victory" then
+    Menu.draw(State.mode); Camera.endDraw(); return
+  end
   drawWorld(State.game)
   Hud.draw(State.game)
   Dialogue.draw(State.game.message)
@@ -237,8 +234,8 @@ function State.keypressed(key)
   if key == "v" and State.mode == "paused" then Settings.cycleVolume(); return end
   if key == "m" and State.mode == "paused" then Settings.toggleMute(); return end
   if State.mode ~= "playing" then return end
-  if key == "f2" then notify(State.game, "Asset set: " .. Assets.toggle()); return end
-  if key == "space" then if Player.dash(State.game.player) then State.game.audio.play("dash") end end
+  if key == "space" or key == "w" or key == "up" then Player.jump(State.game.player) end
+  if key == "lshift" or key == "rshift" then if Player.dash(State.game.player) then State.game.audio.play("dash") end end
   if key == "j" then Combat.melee(State.game) end
   if key == "k" then Combat.magic(State.game) end
   if key == "l" then Combat.chainLightning(State.game) end
@@ -252,11 +249,12 @@ function State.gamepadpressed(_, button)
     return
   end
   if State.mode ~= "playing" then return end
-  if button == "a" then Combat.melee(State.game) end
-  if button == "x" then Combat.magic(State.game) end
+  if button == "a" then Player.jump(State.game.player) end
+  if button == "x" then Combat.melee(State.game) end
+  if button == "y" then Combat.magic(State.game) end
   if button == "rightshoulder" then Combat.chainLightning(State.game) end
   if button == "b" and Player.dash(State.game.player) then State.game.audio.play("dash") end
-  if button == "y" then interact(State.game) end
+  if button == "leftshoulder" then interact(State.game) end
 end
 
 function State.mousepressed(_, _, button)
@@ -279,11 +277,20 @@ function State.smokeTest()
   game.companion.status, game.player.chainUnlocked = "allied", true
   enterArea(game, "forest_depths")
   assert(Companion.present(game.companion, game.area), "Sillius should be present")
+  for _ = 1, 90 do Player.update(game.player, game.level, .016) end
+  assert(game.player.onGround, "player did not land on platform geometry")
+  assert(Player.jump(game.player), "player could not jump from platform")
+  Player.update(game.player, game.level, .016)
+  assert(game.player.vy < 0, "jump impulse was not applied")
   game.player.x, game.player.y, game.player.aimX, game.player.aimY = 400, 250, 1, 0
   assert(Combat.chainLightning(game), "chain lightning did not acquire patrol target")
-  AI.update(game.enemies, game.boss, game.player, game.projectiles, .016)
+  AI.update(game.enemies, game.boss, game.player, game.projectiles, game.level, .016)
   Combat.update(game, .016)
-  print("Celium's Fall smoke test passed: 6 rooms, 2 art sets, Sillius, Chain Lightning")
+  local canvas = love.graphics.newCanvas(1280, 720)
+  love.graphics.setCanvas(canvas)
+  drawWorld(game)
+  love.graphics.setCanvas()
+  print("Celium's Fall smoke test passed: 6 platform panels, gravity/jump, Gothic art, Sillius, Chain Lightning")
 end
 
 return State

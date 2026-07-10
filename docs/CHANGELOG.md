@@ -17,3 +17,6 @@
 - Added Sillius's patrol quest, temporary companion support, and Chain Lightning.
 - Added original and Kenney CC0 sprite sets with live F2 comparison switching.
 - Added a repeatable `make smoke` runtime check for expanded content and asset loading.
+- Converted all six rooms to side-view action-platformer panels with gravity, jumping, and aerial combat.
+- Integrated Ansimuz GothicVania Church and Magic CC0 art plus the Kenney CC0 pixel font.
+- Added layered Gothic backdrops, textured platforms, animated player frames, and pixel-native 640×360 rendering.

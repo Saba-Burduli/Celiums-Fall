@@ -16,3 +16,5 @@
 - [x] Portable `.love` packaging
 - [ ] Platform-specific releases and screenshots
 - [ ] Full 15-minute balance and accessibility playtest
+- [x] Side-view platformer conversion and cohesive Gothic pixel-art presentation
+- [ ] Moving platforms, wall collision, drop-through platforms, and authored ambience

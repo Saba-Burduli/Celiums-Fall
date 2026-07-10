@@ -3,7 +3,7 @@ local Projectile = require("src.entities.projectile")
 local Companion = {}
 
 function Companion.new()
-  return { name = "Sillius", status = "unmet", x = 250, y = 360, radius = 14, shotTimer = 0 }
+  return { name = "Sillius", status = "unmet", x = 250, y = 470, radius = 14, shotTimer = 0 }
 end
 
 function Companion.present(c, area)
@@ -38,7 +38,7 @@ function Companion.update(c, game, dt)
 end
 
 function Companion.draw(c, assets)
-  if not assets.draw("sillius", c.x, c.y, 2.1) then
+  if not assets.draw("sillius", c.x, c.y, 1.1) then
     love.graphics.setColor(.45, .7, .8); love.graphics.circle("fill", c.x, c.y, c.radius)
   end
 end

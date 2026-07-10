@@ -10,7 +10,8 @@ function Projectile.update(p, dt)
   p.life = p.life - dt
 end
 
-function Projectile.draw(p)
+function Projectile.draw(p, assets)
+  if assets and assets.drawProjectile(p) then return end
   love.graphics.setColor(p.color)
   love.graphics.circle("fill", p.x, p.y, p.radius)
   love.graphics.setColor(p.color[1], p.color[2], p.color[3], 0.25)
@@ -18,4 +19,3 @@ function Projectile.draw(p)
 end
 
 return Projectile
-

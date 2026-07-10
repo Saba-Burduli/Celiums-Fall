@@ -1,14 +1,16 @@
 local Menu = {}
 local fonts = {}
+local Assets = require("src.core.assets")
 
 local function center(text, y, size)
-  fonts[size] = fonts[size] or love.graphics.newFont(size)
+  fonts[size] = fonts[size] or love.graphics.newFont("assets/fonts/kenpixel-square.ttf", size)
   love.graphics.setFont(fonts[size])
   love.graphics.printf(text, 0, y, 1280, "center")
 end
 
 function Menu.draw(mode)
-  love.graphics.clear(.025, .018, .04)
+  if Assets.gothic and Assets.gothic.tiles then Assets.drawBackdrop({ background = { .018, .01, .03 }, theme = "church" })
+  else love.graphics.clear(.025, .018, .04) end
   for i = 1, 45 do
     local x, y = (i * 137) % 1280, (i * 83) % 720
     love.graphics.setColor(.22, .12, .3, .18)
@@ -19,7 +21,7 @@ function Menu.draw(mode)
     center("CELIUM'S FALL", 205, 54)
     love.graphics.setColor(.58, .52, .64); center("A dark fantasy action-adventure", 285, 20)
     love.graphics.setColor(.84, .8, .88); center("Enter: new journey    C: continue checkpoint", 410, 22)
-    love.graphics.setColor(.45, .4, .5); center("WASD move  •  J melee  •  K magic  •  L chain spell  •  F2 art set", 475, 15)
+    love.graphics.setColor(.55, .5, .62); center("A/D move  •  Space jump  •  Shift dash  •  J melee  •  K magic", 475, 15)
   elseif mode == "dead" then
     love.graphics.setColor(.65, .12, .2); center("AREN HAS FALLEN", 250, 45)
     love.graphics.setColor(.82, .78, .84); center("Enter: new journey    C: return to checkpoint", 370, 21)

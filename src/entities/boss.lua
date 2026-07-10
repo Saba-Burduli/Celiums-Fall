@@ -1,6 +1,7 @@
 local Defs = require("src.data.bosses")
 local Utils = require("src.core.utils")
 local Projectile = require("src.entities.projectile")
+local Collision = require("src.systems.collision")
 local Boss = {}
 
 function Boss.new(kind, x, y)
@@ -8,6 +9,7 @@ function Boss.new(kind, x, y)
   return { kind = kind, name = d.name, x = x, y = y, hp = d.hp, maxHp = d.hp, speed = d.speed,
     damage = d.damage, radius = d.radius, color = d.color, attackTimer = 1, baseCooldown = d.cooldown,
     summonTimer = 5, chargeTimer = 4, chargeWindup = 0, chargeX = 0, chargeY = 0,
+    halfWidth = d.radius * .75, halfHeight = d.radius, vy = 0, onGround = false,
     flash = 0, dead = false, isBoss = true, phase = 1 }
 end
 
@@ -18,7 +20,7 @@ local function radial(b, projectiles, count, speed)
   end
 end
 
-function Boss.update(b, player, projectiles, enemies, dt)
+function Boss.update(b, player, projectiles, enemies, level, dt)
   b.attackTimer, b.summonTimer = b.attackTimer - dt, b.summonTimer - dt
   b.flash = math.max(0, b.flash - dt)
   if b.kind == "lord_celium" and b.hp < b.maxHp * .5 and b.phase == 1 then
@@ -30,10 +32,10 @@ function Boss.update(b, player, projectiles, enemies, dt)
     b.chargeWindup = b.chargeWindup - dt
     if b.chargeWindup <= 0 then
       b.x = Utils.clamp(b.x + b.chargeX * 175, 70, 1210)
-      b.y = Utils.clamp(b.y + b.chargeY * 175, 100, 650)
+      b.y = Utils.clamp(b.y + b.chargeY * 70, 100, 650)
     end
   else
-    b.x, b.y = b.x + nx * b.speed * pace * dt, b.y + ny * b.speed * pace * dt
+    b.x = b.x + (player.x >= b.x and 1 or -1) * b.speed * pace * dt
   end
   if b.attackTimer <= 0 then
     radial(b, projectiles, b.kind == "mire_priest" and 10 or (b.phase == 2 and 16 or 12), b.phase == 2 and 255 or 205)
@@ -57,10 +59,12 @@ function Boss.update(b, player, projectiles, enemies, dt)
     b.chargeX, b.chargeY, b.chargeWindup = nx, ny, .65
     b.chargeTimer = b.phase == 2 and 3 or 4.5
   end
+  b.x = Utils.clamp(b.x, 40, 1240)
+  Collision.applyPlatformPhysics(b, level.platforms, dt, 1450)
 end
 
 function Boss.draw(b, assets)
-  if assets then assets.draw(b.kind, b.x, b.y, b.kind == "lord_celium" and 4.6 or 3.8, b.flash) end
+  if assets then assets.draw(b.kind, b.x, b.y, b.kind == "lord_celium" and 1.45 or 1.15, b.flash, -1) end
   if not assets then
   love.graphics.setColor(b.flash > 0 and 1 or b.color[1], b.color[2], b.color[3])
   love.graphics.circle("fill", b.x, b.y, b.radius)

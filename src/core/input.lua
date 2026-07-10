@@ -12,6 +12,16 @@ function M.move()
   return Utils.normalize(x, y)
 end
 
+function M.horizontal()
+  local x = (love.keyboard.isDown("d") and 1 or 0) - (love.keyboard.isDown("a") and 1 or 0)
+  local joystick = love.joystick.getJoysticks()[1]
+  if joystick then
+    local axis = joystick:getGamepadAxis("leftx")
+    if math.abs(axis) > .2 then x = axis end
+  end
+  return x
+end
+
 function M.aim(player)
   local x = (love.keyboard.isDown("right") and 1 or 0) - (love.keyboard.isDown("left") and 1 or 0)
   local y = (love.keyboard.isDown("down") and 1 or 0) - (love.keyboard.isDown("up") and 1 or 0)

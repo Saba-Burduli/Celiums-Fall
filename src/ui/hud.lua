@@ -1,5 +1,4 @@
 local Progression = require("src.systems.progression")
-local Assets = require("src.core.assets")
 local Hud = {}
 
 local function bar(x, y, w, h, value, maxValue, color)
@@ -22,7 +21,7 @@ function Hud.draw(game)
   end
   love.graphics.printf(game.level.name, 900, 20, 350, "right")
   love.graphics.setColor(.65, .61, .7); love.graphics.printf(game.questObjective, 720, 48, 530, "right")
-  love.graphics.setColor(.46, .43, .52); love.graphics.printf("Art: " .. Assets.current .. " [F2]", 900, 75, 350, "right")
+  love.graphics.setColor(.46, .43, .52); love.graphics.printf("Space jump  •  Shift dash", 900, 75, 350, "right")
   if game.boss and not game.boss.dead then
     love.graphics.setColor(.92, .82, .9); love.graphics.printf(game.boss.name .. (game.boss.phase == 2 and " — ASCENDANT" or ""), 390, 620, 500, "center")
     bar(390, 646, 500, 18, game.boss.hp, game.boss.maxHp, { .48, .08, .24 })

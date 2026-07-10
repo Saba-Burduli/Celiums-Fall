@@ -1,6 +1,6 @@
 # Compressed Context
 
-Celium's Fall is a compact top-down LÖVE action game targeting a 15-minute run. Aren crosses six rooms from the Cursed Forest to Celium's Summit, helps an Old Villager, recruits the sarcastic former faction occultist Sillius, kills the Mire Priest, and defeats Lord Celium. Original and curated CC0 16-bit sprite sets are hot-swappable.
+Celium's Fall is a compact side-view dark fantasy action-platformer targeting a 15-minute run. Aren crosses six platform panels from the Cursed Forest to Celium's Summit, helps an Old Villager, recruits Sillius, kills the Mire Priest, and defeats Lord Celium. The whole frame renders at 640×360 with GothicVania CC0 pixel art and nearest-neighbor scaling.
 
 ## Current loop
 
@@ -8,22 +8,22 @@ Title → forest/moonstone quest → Forest Depths/Sillius patrol quest → unlo
 
 ## Module map
 
-`core/state` owns lifecycle and transitions; `core/assets` owns the two sprite sets. Entities include player, six regular enemies, bosses, and Sillius. Systems own combat, AI, collisions, quests, and progression. World modules define six rooms/spawns. UI modules draw HUD/dialogue/screens. Data modules contain tuning definitions.
+`core/state` owns lifecycle and panel transitions; `core/camera` owns the low-resolution canvas; `core/assets` owns Gothic animation/environment assets and fallbacks. Collision provides one-way platform physics. Entities include player, six regular enemies, bosses, and Sillius. World modules define six platform layouts and spawns.
 
 ## Controls
 
-WASD/left stick move; mouse/arrows/right stick aim; Space/B dash; J/left mouse/A melee; K/right mouse/X magic; L/right shoulder Chain Lightning after unlock; E/Y interact; Enter/Start begin; Esc/Start pause; C continues; V/M controls volume; F2 switches art sets.
+A/D or left stick move; W/Up/Space or gamepad A jump; Shift/B dash; mouse/arrows/right stick aim; J/left mouse/X melee; K/right mouse/Y magic; L/right shoulder Chain Lightning; E/left shoulder interact; Enter/Start begin; Esc/Start pause; C continues; V/M controls volume.
 
 ## Known limitations
 
-Rooms remain single-screen arenas with simple circle collision, fixed encounters, basic enemy separation, procedural-only audio, checkpoint rather than full world persistence, and short dialogue-only narrative scenes.
+Panels use one-way platform collision rather than slopes or moving platforms. Encounters remain fixed, enemy pathfinding is intentionally simple, audio is procedural, persistence is checkpoint-based, and some bosses/Sillius still use fallback Celium sprites.
 
 ## Next recommended tasks
 
-1. Playtest the complete 15-minute route and tune encounters.
-2. Add enemy attack telegraphs and obstacle collision.
-3. Expand boss introductions and the ending.
-4. Produce platform-specific fused releases.
+1. Playtest jump arcs, platform placement, and airborne combat across the full route.
+2. Add wall collision, moving platforms, and drop-through controls.
+3. Replace remaining fallback boss/Sillius frames with matching Gothic animation.
+4. Add authored ambient music and platform-specific releases.
 
 ## Read these files for X
 
