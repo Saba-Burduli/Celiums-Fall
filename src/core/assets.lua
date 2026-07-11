@@ -42,6 +42,13 @@ function Assets.load()
     idle = sequence("assets/gothic/player/idle"), run = sequence("assets/gothic/player/run"),
     jump = sequence("assets/gothic/player/jump"), attack = sequence("assets/gothic/player/attack"),
   }
+  g.bosses = {
+    mire_priest = { idle = sequence("assets/gothic/bosses/mire/idle") },
+    lord_celium = {
+      idle = sequence("assets/gothic/bosses/celium/idle"),
+      attack = sequence("assets/gothic/bosses/celium/attack"),
+    },
+  }
   g.ghoul = image("assets/gothic/enemies/ghoul.png")
   g.wizard = image("assets/gothic/enemies/wizard.png")
   g.angel = image("assets/gothic/enemies/angel.png")
@@ -86,14 +93,41 @@ function Assets.drawPlayer(player)
   return true
 end
 
+function Assets.drawCompanion(companion)
+  if Assets.current ~= "gothic" then return drawFallback("sillius", companion.x, companion.y, 2.2) end
+  local state = math.abs(companion.vx or 0) > 10 and "run" or "idle"
+  local frames = Assets.gothic.player[state]
+  local frame = frames[(math.floor(companion.animTime * 9) % #frames) + 1]
+  local w, h = frame:getDimensions()
+  love.graphics.setColor(.42, .78, 1)
+  love.graphics.draw(frame, math.floor(companion.x), math.floor(companion.y + 25), 0, 1.35 * companion.facing, 1.35, w / 2, h - 5)
+  return true
+end
+
+function Assets.drawBoss(boss)
+  if Assets.current ~= "gothic" then
+    return drawFallback(boss.kind, boss.x, boss.y, boss.kind == "lord_celium" and 2.7 or 2.3, boss.flash)
+  end
+  local animation = "idle"
+  if boss.kind == "lord_celium" and (boss.chargeWindup > 0 or boss.attackTimer > boss.baseCooldown - .3) then animation = "attack" end
+  local frames = Assets.gothic.bosses[boss.kind][animation]
+  local frame = frames[(math.floor(boss.animTime * (animation == "attack" and 11 or 7)) % #frames) + 1]
+  local w, h = frame:getDimensions()
+  if boss.flash > 0 then love.graphics.setColor(1, .55, .55)
+  elseif boss.kind == "lord_celium" then love.graphics.setColor(1, .3, .4)
+  else love.graphics.setColor(.5, .9, .55) end
+  local scale = boss.kind == "lord_celium" and 1.55 or 1.35
+  love.graphics.draw(frame, math.floor(boss.x), math.floor(boss.y + boss.halfHeight), 0, scale * boss.facing, scale, w / 2, h - 5)
+  return true
+end
+
 function Assets.draw(name, x, y, scale, flash, facing)
   if Assets.current ~= "gothic" then return drawFallback(name, x, y, scale, flash) end
   local actor
   if name == "shadow_thrall" or name == "cursed_hound" or name == "shielded_knight" then actor = Assets.gothic.ghoul
   elseif name == "ash_cultist" or name == "rift_witch" then actor = Assets.gothic.wizard
-  elseif name == "winged_curse" or name == "lord_celium" then actor = Assets.gothic.angel
-  elseif name == "mire_priest" then actor = Assets.gothic.wizard
-  elseif name == "sillius" or name == "villager" then actor = Assets.gothic.player.idle[1] end
+  elseif name == "winged_curse" then actor = Assets.gothic.angel
+  elseif name == "villager" then actor = Assets.gothic.player.idle[1] end
   if actor then
     local w, h = actor:getDimensions()
     local r, g, b = 1, 1, 1
@@ -134,7 +168,7 @@ end
 
 function Assets.drawPlatforms(level)
   for _, platform in ipairs(level.platforms or {}) do
-    love.graphics.setColor(.17, .1, .22)
+    love.graphics.setColor(platform.moving and .25 or .17, .1, platform.moving and .3 or .22)
     love.graphics.rectangle("fill", platform.x, platform.y, platform.w, platform.h)
     local x = platform.x
     while x < platform.x + platform.w do
@@ -142,6 +176,17 @@ function Assets.drawPlatforms(level)
       love.graphics.draw(Assets.gothic.tiles, Assets.gothic.platformQuad, x, platform.y - 6, 0, 1, 1)
       x = x + 48
     end
+    if platform.moving then
+      love.graphics.setColor(.55, .45, .68, .65)
+      love.graphics.line(platform.x + 12, platform.y + platform.h, platform.x + 12, platform.y + platform.h + 22)
+      love.graphics.line(platform.x + platform.w - 12, platform.y + platform.h, platform.x + platform.w - 12, platform.y + platform.h + 22)
+    end
+  end
+  for _, wall in ipairs(level.walls or {}) do
+    love.graphics.setColor(.12, .075, .16)
+    love.graphics.rectangle("fill", wall.x, wall.y, wall.w, wall.h)
+    love.graphics.setColor(.5, .42, .6, .5)
+    love.graphics.rectangle("line", wall.x + 2, wall.y, wall.w - 4, wall.h)
   end
   for _, prop in ipairs(level.props or {}) do
     local quad = Assets.gothic.propsQuads[prop[1]]

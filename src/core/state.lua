@@ -17,6 +17,7 @@ local Save = require("src.core.save")
 local Settings = require("src.core.settings")
 local Assets = require("src.core.assets")
 local Companion = require("src.entities.companion")
+local Platforms = require("src.systems.platforms")
 
 local State = { mode = "title" }
 
@@ -39,6 +40,7 @@ end
 
 local function enterArea(game, name)
   game.area, game.level = name, Levels[name]
+  game.physics = Platforms.create(game.level)
   local flags = {
     blood = game.player.stones.blood, moon = game.player.stones.moon, ash = game.player.stones.ash, wind = game.player.stones.wind,
     questMoon = game.quest.status == "return" or game.quest.status == "done", mireDead = game.mireDead,
@@ -147,12 +149,16 @@ end
 function State.update(dt)
   if State.mode ~= "playing" then return end
   local game, p = State.game, State.game.player
-  Player.update(p, game.level, dt); Camera.update(dt)
+  local riders = { p }
+  for _, enemy in ipairs(game.enemies) do if not enemy.dead then table.insert(riders, enemy) end end
+  if game.boss and not game.boss.dead then table.insert(riders, game.boss) end
+  Platforms.update(game.physics, dt, riders)
+  Player.update(p, game.physics, dt); Camera.update(dt)
   game.meleeFlash = math.max(0, game.meleeFlash - dt)
   game.messageTimer = math.max(0, game.messageTimer - dt)
   if game.messageTimer == 0 then game.message = nil end
   for _, item in ipairs(game.items) do Item.update(item, dt) end
-  AI.update(game.enemies, game.boss, p, game.projectiles, game.level, dt)
+  AI.update(game.enemies, game.boss, p, game.projectiles, game.physics, dt)
   if game.companion.status == "active" and game.area == "forest_depths" and aliveEnemies(game) == 0 then game.companion.status = "ready" end
   Companion.update(game.companion, game, dt)
   Combat.update(game, dt)
@@ -174,7 +180,7 @@ end
 
 local function drawWorld(game)
   Assets.drawBackdrop(game.level)
-  Assets.drawPlatforms(game.level)
+  Assets.drawPlatforms(game.physics)
   for _, hazard in ipairs(game.level.hazards or {}) do
     love.graphics.setColor(.65, .04, .18, .25 + math.sin(love.timer.getTime() * 4) * .08)
     love.graphics.circle("fill", hazard.x, hazard.y, hazard.radius)
@@ -270,6 +276,7 @@ function State.smokeTest()
     enterArea(game, room)
     assert(game.level and game.level.name, "missing room: " .. room)
     assert(game.enemies and game.items, "missing encounter data: " .. room)
+    assert(Platforms.validate(game.level), "invalid platform spacing: " .. room)
   end
   local original = Assets.current
   Assets.toggle(); Assets.toggle()
@@ -277,20 +284,35 @@ function State.smokeTest()
   game.companion.status, game.player.chainUnlocked = "allied", true
   enterArea(game, "forest_depths")
   assert(Companion.present(game.companion, game.area), "Sillius should be present")
-  for _ = 1, 90 do Player.update(game.player, game.level, .016) end
+  local moving
+  for _, platform in ipairs(game.physics.platforms) do if platform.moving then moving = platform; break end end
+  assert(moving, "Forest Depths should contain a moving platform")
+  local rider = { x = moving.x + moving.w / 2, y = moving.y - 16, halfWidth = 10, halfHeight = 16, vy = 0 }
+  local riderX, riderY = rider.x, rider.y
+  Platforms.update(game.physics, .1, { rider })
+  assert(rider.x ~= riderX or rider.y ~= riderY, "moving platform did not carry its rider")
+  local wall = game.physics.walls[1]
+  local collider = { x = wall.x - 14, y = wall.y + 20, halfWidth = 13, halfHeight = 20, vx = 100 }
+  Collision.moveHorizontal(collider, 30, game.physics.walls)
+  assert(collider.x + collider.halfWidth <= wall.x, "wall collision did not block movement")
+  for _ = 1, 90 do Player.update(game.player, game.physics, .016) end
   assert(game.player.onGround, "player did not land on platform geometry")
   assert(Player.jump(game.player), "player could not jump from platform")
-  Player.update(game.player, game.level, .016)
+  Player.update(game.player, game.physics, .016)
   assert(game.player.vy < 0, "jump impulse was not applied")
   game.player.x, game.player.y, game.player.aimX, game.player.aimY = 400, 250, 1, 0
   assert(Combat.chainLightning(game), "chain lightning did not acquire patrol target")
-  AI.update(game.enemies, game.boss, game.player, game.projectiles, game.level, .016)
+  AI.update(game.enemies, game.boss, game.player, game.projectiles, game.physics, .016)
   Combat.update(game, .016)
   local canvas = love.graphics.newCanvas(1280, 720)
   love.graphics.setCanvas(canvas)
   drawWorld(game)
+  assert(#Assets.gothic.bosses.mire_priest.idle == 5, "Mire Priest animation frames missing")
+  assert(#Assets.gothic.bosses.lord_celium.idle == 8 and #Assets.gothic.bosses.lord_celium.attack == 3, "Lord Celium animation frames missing")
+  enterArea(game, "mountain")
+  drawWorld(game)
   love.graphics.setCanvas()
-  print("Celium's Fall smoke test passed: 6 platform panels, gravity/jump, Gothic art, Sillius, Chain Lightning")
+  print("Celium's Fall smoke test passed: 6 balanced panels, moving platforms, walls, animated bosses/Sillius")
 end
 
 return State

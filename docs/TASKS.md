@@ -2,8 +2,8 @@
 
 ## Next
 
-- [ ] Playtest and tune jump arcs, platform spacing, and aerial encounters.
-- [ ] Replace fallback boss and Sillius sprites with matching animated Gothic frames.
+- [ ] Manually playtest moving-platform timing, wall placement, and aerial encounters.
+- [ ] Add drop-through platform controls and wall-aware enemy navigation.
 - [ ] Produce platform-specific fused executables for release.
 
 ## Done
@@ -25,3 +25,6 @@
 - [x] Add gravity, coyote-time jumping, one-way platforms, and airborne combat.
 - [x] Integrate CC0 GothicVania environment, character, enemy, magic, and pixel-font assets.
 - [x] Render the full game at 640×360 with nearest-neighbor scaling.
+- [x] Rebalance all six platform layouts around Aren's jump arc.
+- [x] Add moving platforms with actor carrying and solid wall collision.
+- [x] Replace static Mire Priest, Lord Celium, and Sillius rendering with Gothic animation.

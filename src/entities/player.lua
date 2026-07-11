@@ -1,5 +1,4 @@
 local Input = require("src.core.input")
-local Utils = require("src.core.utils")
 local Collision = require("src.systems.collision")
 local Player = {}
 
@@ -21,7 +20,7 @@ function Player.update(p, level, dt)
   local move = Input.horizontal()
   if move ~= 0 then p.facing = move > 0 and 1 or -1 end
   if p.dashTime > 0 then p.vx = p.facing * p.speed * 2.7 else p.vx = move * p.speed end
-  p.x = Utils.clamp(p.x + p.vx * dt, 22, 1258)
+  Collision.moveHorizontal(p, p.vx * dt, level.walls)
   Collision.applyPlatformPhysics(p, level.platforms, dt, 1500)
   p.coyote = p.onGround and .11 or math.max(0, p.coyote - dt)
   if p.y > 760 then p.hp = 0 end

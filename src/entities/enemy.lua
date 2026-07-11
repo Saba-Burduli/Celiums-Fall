@@ -20,6 +20,7 @@ local function shootSpread(e, nx, ny, projectiles)
 end
 
 function Enemy.update(e, player, projectiles, level, dt)
+  local oldX = e.x
   e.attackTimer, e.flash = math.max(0, e.attackTimer - dt), math.max(0, e.flash - dt)
   local dx, dy = player.x - e.x, player.y - e.y
   local nx, ny = Utils.normalize(dx, dy)
@@ -56,7 +57,13 @@ function Enemy.update(e, player, projectiles, level, dt)
   else
     e.x = e.x + (dx >= 0 and 1 or -1) * e.speed * dt
   end
-  e.x = Utils.clamp(e.x, 18, 1262)
+  if e.behavior == "teleport" then
+    e.x = Utils.clamp(e.x, 18, 1262)
+  else
+    local movement = e.x - oldX
+    e.x = oldX
+    Collision.moveHorizontal(e, movement, level.walls)
+  end
   if e.behavior ~= "flying" and e.behavior ~= "teleport" then Collision.applyPlatformPhysics(e, level.platforms, dt, 1450) end
 end
 

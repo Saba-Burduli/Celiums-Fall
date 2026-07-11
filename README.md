@@ -33,7 +33,7 @@ No external assets or Lua packages are required. To publish later, add a remote 
 ## MVP features
 
 - Title, play, pause, death, restart, and victory states
-- Side-view platforming with gravity, coyote-time jumping, one-way platforms, and aerial combat
+- Side-view platforming with gravity, coyote-time jumping, moving platforms, solid walls, and aerial combat
 - Three connected areas: Cursed Forest, Ruined Shrine, Black Mountain
 - Six rooms across the forest, shrine, and mountain route
 - Aren movement, dash, melee, magic, health, and mana

@@ -13,4 +13,4 @@ Dependencies flow from state → world/entities/systems/UI → data/core helpers
 
 `core/save` persists a small versioned checkpoint through `love.filesystem`; `core/settings` owns persisted audio preferences; `core/audio` generates short sound effects in memory. None requires bundled assets.
 
-`core/assets` loads GothicVania environment pieces, frame sequences, enemies, spell effects, and fallback sheets behind semantic draw calls. `core/camera` renders the full game to a 640×360 canvas before nearest-neighbor scaling. `systems/collision` applies gravity and one-way platform landing to players, grounded enemies, and bosses.
+`core/assets` loads GothicVania environment pieces, frame sequences, enemies, spell effects, and fallback sheets behind semantic draw calls. `core/camera` renders the full game to a 640×360 canvas before nearest-neighbor scaling. `systems/platforms` clones static level data into per-room runtime geometry, animates moving platforms, and carries grounded actors. `systems/collision` applies gravity, one-way landings, and axis-aligned wall blocking.

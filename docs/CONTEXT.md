@@ -8,7 +8,7 @@ Title → forest/moonstone quest → Forest Depths/Sillius patrol quest → unlo
 
 ## Module map
 
-`core/state` owns lifecycle and panel transitions; `core/camera` owns the low-resolution canvas; `core/assets` owns Gothic animation/environment assets and fallbacks. Collision provides one-way platform physics. Entities include player, six regular enemies, bosses, and Sillius. World modules define six platform layouts and spawns.
+`core/state` owns lifecycle and panel transitions; `core/camera` owns the low-resolution canvas; `core/assets` owns Gothic animation/environment assets and fallbacks. `systems/platforms` creates and moves runtime platforms while `systems/collision` handles one-way landings and solid walls. Entities include player, six regular enemies, animated bosses, and animated Sillius. World modules define six platform layouts and spawns.
 
 ## Controls
 
@@ -16,21 +16,20 @@ A/D or left stick move; W/Up/Space or gamepad A jump; Shift/B dash; mouse/arrows
 
 ## Known limitations
 
-Panels use one-way platform collision rather than slopes or moving platforms. Encounters remain fixed, enemy pathfinding is intentionally simple, audio is procedural, persistence is checkpoint-based, and some bosses/Sillius still use fallback Celium sprites.
+Platforms remain one-way and do not support drop-through or slopes. Moving platforms use simple fixed sine paths, encounters remain fixed, enemy pathfinding is intentionally simple, audio is procedural, and persistence is checkpoint-based.
 
 ## Next recommended tasks
 
-1. Playtest jump arcs, platform placement, and airborne combat across the full route.
-2. Add wall collision, moving platforms, and drop-through controls.
-3. Replace remaining fallback boss/Sillius frames with matching Gothic animation.
-4. Add authored ambient music and platform-specific releases.
+1. Manually playtest moving-platform timing, wall placement, and airborne encounters across the full route.
+2. Add drop-through controls and improve enemy navigation around walls.
+3. Add authored ambient music and platform-specific releases.
 
 ## Read these files for X
 
 - Player/combat: `src/entities/player.lua`, `src/systems/combat.lua`
 - Enemy behavior: `src/entities/enemy.lua`, `src/entities/boss.lua`, `src/systems/ai.lua`
 - Sillius/chain spell: `src/entities/companion.lua`, `src/systems/combat.lua`
-- Map/collision: `src/world/levels.lua`, `src/systems/collision.lua`
+- Map/collision: `src/world/levels.lua`, `src/systems/platforms.lua`, `src/systems/collision.lua`
 - Encounters: `src/world/spawner.lua`, `src/data/enemies.lua`, `src/data/bosses.lua`
 - UI/dialogue: `src/ui/hud.lua`, `src/ui/dialogue.lua`, `src/ui/menu.lua`
 - Asset switching: `src/core/assets.lua`, `CREDITS.md`

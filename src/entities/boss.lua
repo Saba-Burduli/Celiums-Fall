@@ -10,7 +10,7 @@ function Boss.new(kind, x, y)
     damage = d.damage, radius = d.radius, color = d.color, attackTimer = 1, baseCooldown = d.cooldown,
     summonTimer = 5, chargeTimer = 4, chargeWindup = 0, chargeX = 0, chargeY = 0,
     halfWidth = d.radius * .75, halfHeight = d.radius, vy = 0, onGround = false,
-    flash = 0, dead = false, isBoss = true, phase = 1 }
+    flash = 0, dead = false, isBoss = true, phase = 1, animTime = 0, facing = -1 }
 end
 
 local function radial(b, projectiles, count, speed)
@@ -21,12 +21,15 @@ local function radial(b, projectiles, count, speed)
 end
 
 function Boss.update(b, player, projectiles, enemies, level, dt)
+  local oldX = b.x
+  b.animTime = b.animTime + dt
   b.attackTimer, b.summonTimer = b.attackTimer - dt, b.summonTimer - dt
   b.flash = math.max(0, b.flash - dt)
   if b.kind == "lord_celium" and b.hp < b.maxHp * .5 and b.phase == 1 then
     b.phase, b.phaseChanged = 2, true
   end
   local nx, ny = Utils.normalize(player.x - b.x, player.y - b.y)
+  b.facing = player.x >= b.x and 1 or -1
   local pace = b.phase == 2 and 1.35 or 1
   if b.chargeWindup > 0 then
     b.chargeWindup = b.chargeWindup - dt
@@ -59,12 +62,14 @@ function Boss.update(b, player, projectiles, enemies, level, dt)
     b.chargeX, b.chargeY, b.chargeWindup = nx, ny, .65
     b.chargeTimer = b.phase == 2 and 3 or 4.5
   end
-  b.x = Utils.clamp(b.x, 40, 1240)
+  local movement = b.x - oldX
+  b.x = oldX
+  Collision.moveHorizontal(b, movement, level.walls)
   Collision.applyPlatformPhysics(b, level.platforms, dt, 1450)
 end
 
 function Boss.draw(b, assets)
-  if assets then assets.draw(b.kind, b.x, b.y, b.kind == "lord_celium" and 1.45 or 1.15, b.flash, -1) end
+  if assets then assets.drawBoss(b) end
   if not assets then
   love.graphics.setColor(b.flash > 0 and 1 or b.color[1], b.color[2], b.color[3])
   love.graphics.circle("fill", b.x, b.y, b.radius)

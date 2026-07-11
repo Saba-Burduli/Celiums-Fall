@@ -20,3 +20,5 @@
 - Converted all six rooms to side-view action-platformer panels with gravity, jumping, and aerial combat.
 - Integrated Ansimuz GothicVania Church and Magic CC0 art plus the Kenney CC0 pixel font.
 - Added layered Gothic backdrops, textured platforms, animated player frames, and pixel-native 640×360 rendering.
+- Rebalanced platform spacing, added moving platforms with actor carrying, and introduced solid ruined-wall collision.
+- Added Gothic idle/attack animation for the Mire Priest and Lord Celium plus animated Sillius movement.
