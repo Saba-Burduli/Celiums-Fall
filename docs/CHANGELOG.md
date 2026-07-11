@@ -24,3 +24,4 @@
 - Added Gothic idle/attack animation for the Mire Priest and Lord Celium plus animated Sillius movement.
 - Added Down + Jump drop-through for one-way ledges while keeping ground solid.
 - Added room-local platform graphs, A* routing, safe jumps/drops, wall traversal, and moving-platform waits for grounded enemies.
+- Corrected Aren's jump arc so every room's first elevated platform is reachable.

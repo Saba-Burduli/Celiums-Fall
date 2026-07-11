@@ -31,7 +31,7 @@ end
 
 function Player.jump(p)
   if p.coyote <= 0 then return false end
-  p.vy, p.onGround, p.coyote = -570, false, 0
+  p.vy, p.onGround, p.coyote = -670, false, 0
   return true
 end
 

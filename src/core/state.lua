@@ -283,6 +283,15 @@ function State.smokeTest()
     assert(game.level and game.level.name, "missing room: " .. room)
     assert(game.enemies and game.items, "missing encounter data: " .. room)
     assert(Platforms.validate(game.level), "invalid platform spacing: " .. room)
+    local jumper = Player.new(game.level.entry[1], 607)
+    jumper.onGround, jumper.coyote = true, .11
+    assert(Player.jump(jumper), "jump setup failed: " .. room)
+    for _ = 1, 150 do
+      Collision.moveHorizontal(jumper, jumper.speed * .016, game.physics.walls)
+      Collision.applyPlatformPhysics(jumper, game.physics.platforms, .016, 1500)
+      if jumper.supportingPlatformId == "static:2" then break end
+    end
+    assert(jumper.supportingPlatformId == "static:2", "first elevated platform is unreachable: " .. room)
   end
   local original = Assets.current
   Assets.toggle(); Assets.toggle()
