@@ -2,6 +2,7 @@ local Defs = require("src.data.enemies")
 local Utils = require("src.core.utils")
 local Projectile = require("src.entities.projectile")
 local Collision = require("src.systems.collision")
+local Navigation = require("src.systems.navigation")
 local Enemy = {}
 
 function Enemy.new(kind, x, y)
@@ -28,13 +29,14 @@ function Enemy.update(e, player, projectiles, level, dt)
   e.facing = dx >= 0 and 1 or -1
   e.specialTimer, e.hover = e.specialTimer - dt, e.hover + dt
   if e.behavior == "shield" then
+    local baseSpeed = e.speed
     if e.specialTimer <= 0 then
       e.guard = false
-      e.x = e.x + (dx >= 0 and 1 or -1) * e.speed * 2.8 * dt
+      e.speed = e.speed * 2.8
       if e.specialTimer <= -.55 then e.specialTimer, e.guard = 2.5, true end
-    else
-      e.x = e.x + (dx >= 0 and 1 or -1) * e.speed * dt
     end
+    Navigation.update(e, player, level, dt)
+    e.speed = baseSpeed
   elseif e.behavior == "teleport" then
     if e.specialTimer <= 0 then
       local angle = love.math.random() * math.pi * 2
@@ -48,14 +50,13 @@ function Enemy.update(e, player, projectiles, level, dt)
     local sway = math.sin(e.hover * 3) * 75
     e.x, e.y = e.x + (nx * e.speed - ny * sway) * dt, e.y + (ny * e.speed + nx * sway) * dt
   elseif e.behavior == "ranged" then
-    if math.abs(dx) > 230 then e.x = e.x + (dx >= 0 and 1 or -1) * e.speed * dt end
-    if math.abs(dx) < 150 then e.x = e.x - (dx >= 0 and 1 or -1) * e.speed * dt end
+    Navigation.update(e, player, level, dt, 190)
     if e.attackTimer == 0 and dist < 440 then
       table.insert(projectiles, Projectile.new(e.x, e.y, nx, ny, "enemy", e.damage, 230, { .55, .48, .35 }, 5))
       e.attackTimer = 1.7
     end
   else
-    e.x = e.x + (dx >= 0 and 1 or -1) * e.speed * dt
+    Navigation.update(e, player, level, dt)
   end
   if e.behavior == "teleport" then
     e.x = Utils.clamp(e.x, 18, 1262)

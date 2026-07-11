@@ -35,6 +35,10 @@ function Player.jump(p)
   return true
 end
 
+function Player.dropThrough(p)
+  return Collision.dropThrough(p)
+end
+
 function Player.dash(p)
   if p.dashTimer > 0 then return false end
   p.dashTimer, p.invulnerable, p.dashTime = p.dashCooldown, 0.25, .18

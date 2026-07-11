@@ -4,7 +4,13 @@ function love.load(args)
   love.graphics.setDefaultFilter("nearest", "nearest")
   State.load()
   for _, value in ipairs(args or {}) do
-    if value == "--smoke" then State.smokeTest(); love.event.quit(); return end
+    if value == "--smoke" then
+      local ok, err = xpcall(State.smokeTest, debug.traceback)
+      love.graphics.setCanvas()
+      if not ok then print(err) end
+      love.event.quit(ok and 0 or 1)
+      return
+    end
   end
 end
 

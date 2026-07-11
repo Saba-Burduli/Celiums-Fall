@@ -3,7 +3,6 @@
 ## Next
 
 - [ ] Manually playtest moving-platform timing, wall placement, and aerial encounters.
-- [ ] Add drop-through platform controls and wall-aware enemy navigation.
 - [ ] Produce platform-specific fused executables for release.
 
 ## Done
@@ -28,3 +27,4 @@
 - [x] Rebalance all six platform layouts around Aren's jump arc.
 - [x] Add moving platforms with actor carrying and solid wall collision.
 - [x] Replace static Mire Priest, Lord Celium, and Sillius rendering with Gothic animation.
+- [x] Add drop-through controls and platform-graph navigation for grounded enemies.

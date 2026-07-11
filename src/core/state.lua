@@ -1,4 +1,5 @@
 local Camera = require("src.core.camera")
+local Input = require("src.core.input")
 local Player = require("src.entities.player")
 local Projectile = require("src.entities.projectile")
 local Item = require("src.entities.item")
@@ -18,6 +19,7 @@ local Settings = require("src.core.settings")
 local Assets = require("src.core.assets")
 local Companion = require("src.entities.companion")
 local Platforms = require("src.systems.platforms")
+local Navigation = require("src.systems.navigation")
 
 local State = { mode = "title" }
 
@@ -240,7 +242,9 @@ function State.keypressed(key)
   if key == "v" and State.mode == "paused" then Settings.cycleVolume(); return end
   if key == "m" and State.mode == "paused" then Settings.toggleMute(); return end
   if State.mode ~= "playing" then return end
-  if key == "space" or key == "w" or key == "up" then Player.jump(State.game.player) end
+  if key == "space" or key == "w" or key == "up" then
+    if Input.down() then Player.dropThrough(State.game.player) else Player.jump(State.game.player) end
+  end
   if key == "lshift" or key == "rshift" then if Player.dash(State.game.player) then State.game.audio.play("dash") end end
   if key == "j" then Combat.melee(State.game) end
   if key == "k" then Combat.magic(State.game) end
@@ -255,7 +259,9 @@ function State.gamepadpressed(_, button)
     return
   end
   if State.mode ~= "playing" then return end
-  if button == "a" then Player.jump(State.game.player) end
+  if button == "a" then
+    if Input.down() then Player.dropThrough(State.game.player) else Player.jump(State.game.player) end
+  end
   if button == "x" then Combat.melee(State.game) end
   if button == "y" then Combat.magic(State.game) end
   if button == "rightshoulder" then Combat.chainLightning(State.game) end
@@ -300,9 +306,68 @@ function State.smokeTest()
   assert(Player.jump(game.player), "player could not jump from platform")
   Player.update(game.player, game.physics, .016)
   assert(game.player.vy < 0, "jump impulse was not applied")
+
+  local traversal = Platforms.create({
+    platforms = { { x = 0, y = 632, w = 1280, h = 88 }, { x = 240, y = 500, w = 180, h = 24 },
+      { x = 500, y = 400, w = 180, h = 24 } },
+    walls = { { x = 400, y = 532, w = 36, h = 100 } },
+  })
+  local elevated = traversal.platforms[2]
+  local dropper = Player.new(300, elevated.y - 25)
+  dropper.onGround, dropper.supportingPlatform, dropper.supportingPlatformId = true, elevated, elevated.id
+  assert(Player.dropThrough(dropper), "player could not drop through a one-way ledge")
+  for _ = 1, 90 do Collision.applyPlatformPhysics(dropper, traversal.platforms, .016, 1500) end
+  assert(dropper.supportingPlatformId == "static:1", "player did not land below a dropped-through ledge")
+  assert(not Player.dropThrough(dropper), "player dropped through solid ground")
+
+  local groundNodes = 0
+  for _, node in ipairs(traversal.navigation.nodes) do if node.platform.id == "static:1" then groundNodes = groundNodes + 1 end end
+  assert(groundNodes == 2, "wall did not split the ground navigation span")
+  local routeEnemy = { x = 100, y = 616, halfWidth = 10, halfHeight = 16, speed = 90, vy = 0,
+    onGround = true, supportingPlatform = traversal.platforms[1], supportingPlatformId = "static:1" }
+  local routePlayer = { x = 570, y = 375, halfWidth = 13, halfHeight = 25, onGround = true,
+    supportingPlatform = traversal.platforms[3], supportingPlatformId = "static:3" }
+  local startNode, goalNode = Navigation.nodeFor(traversal, routeEnemy), Navigation.nodeFor(traversal, routePlayer)
+  local route = Navigation.route(traversal, startNode.id, goalNode.id)
+  assert(route and #route > 1, "grounded enemy did not find a multi-platform route")
+  Navigation.update(routeEnemy, routePlayer, traversal, .016)
+  assert(routeEnemy.nav and routeEnemy.nav.route, "grounded enemy route state was not retained")
+  local Enemy = require("src.entities.enemy")
+  local climber = Enemy.new("shadow_thrall", 100, 616)
+  climber.onGround, climber.supportingPlatform, climber.supportingPlatformId = true, traversal.platforms[1], "static:1"
+  for _ = 1, 720 do Enemy.update(climber, routePlayer, {}, traversal, .016) end
+  assert(climber.supportingPlatformId == "static:3", "grounded enemy did not complete upward jumps")
+  routePlayer.x, routePlayer.y = 520, 607
+  routePlayer.supportingPlatform, routePlayer.supportingPlatformId = traversal.platforms[1], "static:1"
+  for _ = 1, 360 do Enemy.update(climber, routePlayer, {}, traversal, .016) end
+  assert(climber.supportingPlatformId == "static:1", "grounded enemy did not descend safely")
+  local ledgeGuardX = climber.x
+  routePlayer.supportingPlatform, routePlayer.supportingPlatformId = nil, nil
+  for _ = 1, 60 do Enemy.update(climber, routePlayer, {}, traversal, .016) end
+  assert(math.abs(climber.x - ledgeGuardX) < 1, "grounded enemy walked without a supported route")
+
+  local shuttle = Platforms.create({
+    platforms = { { x = 0, y = 632, w = 620, h = 88 } },
+    movingPlatforms = { { x = 1000, y = 500, w = 120, h = 20, axis = "x", range = 350, speed = 1 } },
+  })
+  local mover = shuttle.platforms[2]
+  local waiter = { x = 600, y = 616, halfWidth = 10, halfHeight = 16, speed = 80, vy = 0,
+    onGround = true, supportingPlatform = shuttle.platforms[1], supportingPlatformId = "static:1" }
+  local riderTarget = { x = mover.x + 60, y = mover.y - 25, halfWidth = 13, halfHeight = 25, onGround = true,
+    supportingPlatform = mover, supportingPlatformId = mover.id }
+  Navigation.update(waiter, riderTarget, shuttle, .016)
+  assert(waiter.nav.waitState == "waiting_for_platform", "moving-platform route did not wait when unreachable")
+  mover.x, riderTarget.x = 650, 710
+  Navigation.update(waiter, riderTarget, shuttle, .016)
+  assert(waiter.nav.waitState ~= "waiting_for_platform" and waiter.vy < 0, "enemy did not board a reachable moving platform")
   game.player.x, game.player.y, game.player.aimX, game.player.aimY = 400, 250, 1, 0
   assert(Combat.chainLightning(game), "chain lightning did not acquire patrol target")
   AI.update(game.enemies, game.boss, game.player, game.projectiles, game.physics, .016)
+  for _, enemy in ipairs(game.enemies) do
+    if enemy.behavior == "flying" or enemy.behavior == "teleport" then
+      assert(not enemy.nav, "airborne or teleporting enemy entered grounded navigation")
+    end
+  end
   Combat.update(game, .016)
   local canvas = love.graphics.newCanvas(1280, 720)
   love.graphics.setCanvas(canvas)
@@ -310,9 +375,12 @@ function State.smokeTest()
   assert(#Assets.gothic.bosses.mire_priest.idle == 5, "Mire Priest animation frames missing")
   assert(#Assets.gothic.bosses.lord_celium.idle == 8 and #Assets.gothic.bosses.lord_celium.attack == 3, "Lord Celium animation frames missing")
   enterArea(game, "mountain")
+  local bossTimer = game.boss.attackTimer
+  AI.update(game.enemies, game.boss, game.player, game.projectiles, game.physics, .016)
+  assert(game.boss.attackTimer < bossTimer and not game.boss.nav, "boss authored update regressed")
   drawWorld(game)
   love.graphics.setCanvas()
-  print("Celium's Fall smoke test passed: 6 balanced panels, moving platforms, walls, animated bosses/Sillius")
+  print("Celium's Fall smoke test passed: drop-through, platform A*, moving-platform waits, 6 panels, bosses/Sillius")
 end
 
 return State

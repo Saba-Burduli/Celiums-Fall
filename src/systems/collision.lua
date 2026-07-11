@@ -30,19 +30,34 @@ function Collision.applyPlatformPhysics(entity, platforms, dt, gravity)
   local nextY = entity.y + entity.vy * dt
   local nextBottom = nextY + halfHeight
   entity.onGround = false
+  entity.supportingPlatform, entity.supportingPlatformId = nil, nil
+  entity.ignorePlatformTimer = math.max(0, (entity.ignorePlatformTimer or 0) - dt)
+  if entity.ignorePlatformTimer == 0 then entity.ignorePlatformId = nil end
   if entity.vy >= 0 then
     local landing
     for _, platform in ipairs(platforms or {}) do
       local overlapsX = entity.x + halfWidth > platform.x and entity.x - halfWidth < platform.x + platform.w
-      if overlapsX and previousBottom <= platform.y + 2 and nextBottom >= platform.y then
+      local ignored = entity.ignorePlatformId == platform.id and platform.oneWay ~= false
+      if not ignored and overlapsX and previousBottom <= platform.y + 2 and nextBottom >= platform.y then
         if not landing or platform.y < landing.y then landing = platform end
       end
     end
     if landing then
       nextY, entity.vy, entity.onGround = landing.y - halfHeight, 0, true
+      entity.supportingPlatform, entity.supportingPlatformId = landing, landing.id
     end
   end
   entity.y = nextY
+end
+
+
+function Collision.dropThrough(entity)
+  local platform = entity.supportingPlatform
+  if not entity.onGround or not platform or platform.oneWay == false then return false end
+  entity.ignorePlatformId, entity.ignorePlatformTimer = platform.id, .24
+  entity.supportingPlatform, entity.supportingPlatformId = nil, nil
+  entity.onGround, entity.coyote, entity.vy = false, 0, math.max(entity.vy or 0, 90)
+  return true
 end
 
 return Collision

@@ -22,6 +22,12 @@ function M.horizontal()
   return x
 end
 
+function M.down()
+  if love.keyboard.isDown("s") or love.keyboard.isDown("down") then return true end
+  local joystick = love.joystick.getJoysticks()[1]
+  return joystick and joystick:getGamepadAxis("lefty") > .55 or false
+end
+
 function M.aim(player)
   local x = (love.keyboard.isDown("right") and 1 or 0) - (love.keyboard.isDown("left") and 1 or 0)
   local y = (love.keyboard.isDown("down") and 1 or 0) - (love.keyboard.isDown("up") and 1 or 0)

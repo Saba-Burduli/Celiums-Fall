@@ -18,6 +18,7 @@ No external assets or Lua packages are required. To publish later, add a remote 
 
 - A / D or left stick: move
 - W / Up / Space or gamepad A: jump
+- S / Down + jump or left stick down + gamepad A: drop through a one-way ledge
 - Mouse or arrow keys: aim
 - J / left mouse / gamepad X: melee
 - K / right mouse / gamepad Y: magic projectile
@@ -33,12 +34,13 @@ No external assets or Lua packages are required. To publish later, add a remote 
 ## MVP features
 
 - Title, play, pause, death, restart, and victory states
-- Side-view platforming with gravity, coyote-time jumping, moving platforms, solid walls, and aerial combat
+- Side-view platforming with gravity, coyote-time jumping, drop-through ledges, moving platforms, solid walls, and aerial combat
 - Three connected areas: Cursed Forest, Ruined Shrine, Black Mountain
 - Six rooms across the forest, shrine, and mountain route
 - Aren movement, dash, melee, magic, health, and mana
 - Three regular enemies and two bosses with distinct behaviors
 - Shielded Knight, Rift Witch, and Winged Curse enemy archetypes
+- Grounded enemies use room-local platform routes to jump, descend, clear walls, and board moving platforms
 - Four permanent stone upgrades and a moonstone side quest
 - HUD, dialogue prompts, boss health bar, particles, hit flashes, and camera shake
 - 640×360 pixel-native rendering with nearest-neighbor scaling

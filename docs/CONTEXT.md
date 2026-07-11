@@ -8,20 +8,20 @@ Title → forest/moonstone quest → Forest Depths/Sillius patrol quest → unlo
 
 ## Module map
 
-`core/state` owns lifecycle and panel transitions; `core/camera` owns the low-resolution canvas; `core/assets` owns Gothic animation/environment assets and fallbacks. `systems/platforms` creates and moves runtime platforms while `systems/collision` handles one-way landings and solid walls. Entities include player, six regular enemies, animated bosses, and animated Sillius. World modules define six platform layouts and spawns.
+`core/state` owns lifecycle and panel transitions; `core/camera` owns the low-resolution canvas; `core/assets` owns Gothic animation/environment assets and fallbacks. `systems/platforms` creates stable runtime platforms and movement envelopes; `systems/collision` handles support tracking, one-way landings/drop-through, and solid walls; `systems/navigation` builds room-local platform graphs and A* routes for grounded enemies. Entities include player, six regular enemies, animated bosses, and animated Sillius. World modules define six platform layouts and spawns.
 
 ## Controls
 
-A/D or left stick move; W/Up/Space or gamepad A jump; Shift/B dash; mouse/arrows/right stick aim; J/left mouse/X melee; K/right mouse/Y magic; L/right shoulder Chain Lightning; E/left shoulder interact; Enter/Start begin; Esc/Start pause; C continues; V/M controls volume.
+A/D or left stick move; W/Up/Space or gamepad A jump; S/Down + jump or left stick down + A drops through one-way ledges; Shift/B dash; mouse/arrows/right stick aim; J/left mouse/X melee; K/right mouse/Y magic; L/right shoulder Chain Lightning; E/left shoulder interact; Enter/Start begin; Esc/Start pause; C continues; V/M controls volume.
 
 ## Known limitations
 
-Platforms remain one-way and do not support drop-through or slopes. Moving platforms use simple fixed sine paths, encounters remain fixed, enemy pathfinding is intentionally simple, audio is procedural, and persistence is checkpoint-based.
+Platforms do not support slopes. Moving platforms use fixed sine paths, encounters remain fixed, navigation uses compact per-room graphs rather than a navmesh, audio is procedural, and persistence is checkpoint-based.
 
 ## Next recommended tasks
 
 1. Manually playtest moving-platform timing, wall placement, and airborne encounters across the full route.
-2. Add drop-through controls and improve enemy navigation around walls.
+2. Tune grounded-enemy launch points and moving-platform waits from manual playtests.
 3. Add authored ambient music and platform-specific releases.
 
 ## Read these files for X
