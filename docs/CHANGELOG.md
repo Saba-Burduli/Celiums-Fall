@@ -26,3 +26,4 @@
 - Added room-local platform graphs, A* routing, safe jumps/drops, wall traversal, and moving-platform waits for grounded enemies.
 - Corrected Aren's jump arc so every room's first elevated platform is reachable.
 - Expanded the journey to nine rooms with Thornwatch Ruins, Drowned Ossuary, and Black Keep encounters.
+- Replaced pause shortcuts with a navigable menu for master volume, SFX volume, and mute.

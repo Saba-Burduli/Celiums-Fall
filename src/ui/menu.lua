@@ -33,10 +33,21 @@ function Menu.draw(mode)
   end
 end
 
-function Menu.pause()
+function Menu.pause(settings, selection)
   love.graphics.setColor(0, 0, 0, .72); love.graphics.rectangle("fill", 0, 0, 1280, 720)
-  love.graphics.setColor(.9, .85, .95); center("PAUSED", 285, 42)
-  love.graphics.setColor(.65, .6, .7); center("Esc to return  •  V volume  •  M mute", 355, 18)
+  love.graphics.setColor(.9, .85, .95); center("PAUSED", 155, 42)
+  local options = {
+    "Resume",
+    ("Master Volume    %d%%"):format(math.floor(settings.volume * 100 + .5)),
+    ("SFX Volume       %d%%"):format(math.floor(settings.sfxVolume * 100 + .5)),
+    "Mute             " .. (settings.muted and "ON" or "OFF"),
+  }
+  for index, label in ipairs(options) do
+    love.graphics.setColor(index == selection and { .9, .72, .35 } or { .72, .68, .78 })
+    center((index == selection and ">  " or "   ") .. label, 255 + index * 52, 21)
+  end
+  love.graphics.setColor(.52, .48, .58)
+  center("Up/Down select  •  Left/Right adjust  •  Enter/A confirm  •  Esc/B resume", 535, 16)
 end
 
 return Menu

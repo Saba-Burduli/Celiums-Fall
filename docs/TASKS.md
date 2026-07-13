@@ -29,3 +29,4 @@
 - [x] Replace static Mire Priest, Lord Celium, and Sillius rendering with Gothic animation.
 - [x] Add drop-through controls and platform-graph navigation for grounded enemies.
 - [x] Expand the route with Thornwatch Ruins, Drowned Ossuary, and Black Keep.
+- [x] Add a navigable pause menu with persisted master and SFX audio controls.

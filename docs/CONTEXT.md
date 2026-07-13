@@ -12,7 +12,7 @@ Title → forest/moonstone quest → Forest Depths/Sillius patrol quest → Thor
 
 ## Controls
 
-A/D or left stick move; W/Up/Space or gamepad A jump; S/Down + jump or left stick down + A drops through one-way ledges; Shift/B dash; mouse/arrows/right stick aim; J/left mouse/X melee; K/right mouse/Y magic; L/right shoulder Chain Lightning; E/left shoulder interact; Enter/Start begin; Esc/Start pause; C continues; V/M controls volume.
+A/D or left stick move; W/Up/Space or gamepad A jump; S/Down + jump or left stick down + A drops through one-way ledges; Shift/B dash; mouse/arrows/right stick aim; J/left mouse/X melee; K/right mouse/Y magic; L/right shoulder Chain Lightning; E/left shoulder interact; Enter/Start begin; Esc/Start opens the pause menu; C continues. The pause menu exposes persisted master volume, SFX volume, and mute controls.
 
 ## Known limitations
 

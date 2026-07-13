@@ -28,7 +28,7 @@ No external assets or Lua packages are required. To publish later, add a remote 
 - Enter: start / confirm / restart
 - Esc: pause
 - C on title: continue saved checkpoint
-- V / M while paused: cycle volume / mute
+- Pause menu: adjust master volume, SFX volume, and mute with keyboard or controller
 - Gamepad: left stick move, right stick aim, A jump, X melee, Y magic, B dash, Start pause
 
 ## MVP features
@@ -46,6 +46,7 @@ No external assets or Lua packages are required. To publish later, add a remote 
 - 640×360 pixel-native rendering with nearest-neighbor scaling
 - GothicVania Church environment, animated character, enemy, and magic assets
 - Procedural sound effects, persisted settings/checkpoints, and gamepad controls
+- Navigable pause menu with separate master and SFX volume controls
 - Sillius ally quest, temporary companion combat, and chain-lightning unlock
 - Original Celium and Kenney Tiny Dungeon sprites remain as fallback assets
 

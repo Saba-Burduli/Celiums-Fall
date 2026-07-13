@@ -21,7 +21,7 @@ local Companion = require("src.entities.companion")
 local Platforms = require("src.systems.platforms")
 local Navigation = require("src.systems.navigation")
 
-local State = { mode = "title" }
+local State = { mode = "title", pauseSelection = 1 }
 
 local function notify(game, text)
   game.message, game.messageTimer = text, 3.2
@@ -227,7 +227,7 @@ function State.draw()
   drawWorld(State.game)
   Hud.draw(State.game)
   Dialogue.draw(State.game.message)
-  if State.mode == "paused" then Menu.pause() end
+  if State.mode == "paused" then Menu.pause(Settings, State.pauseSelection) end
   Camera.endDraw()
 end
 
@@ -238,9 +238,30 @@ function State.keypressed(key)
   if key == "c" and (State.mode == "title" or State.mode == "dead") and Save.exists() then
     State.game = newGame(Save.read()); State.mode = "playing"; return
   end
-  if key == "escape" and (State.mode == "playing" or State.mode == "paused") then State.mode = State.mode == "playing" and "paused" or "playing"; return end
-  if key == "v" and State.mode == "paused" then Settings.cycleVolume(); return end
-  if key == "m" and State.mode == "paused" then Settings.toggleMute(); return end
+  if key == "escape" and (State.mode == "playing" or State.mode == "paused") then
+    State.mode = State.mode == "playing" and "paused" or "playing"
+    if State.mode == "paused" then State.pauseSelection = 1 end
+    return
+  end
+  if State.mode == "paused" then
+    if key == "up" or key == "w" then State.pauseSelection = State.pauseSelection == 1 and 4 or State.pauseSelection - 1 end
+    if key == "down" or key == "s" then State.pauseSelection = State.pauseSelection == 4 and 1 or State.pauseSelection + 1 end
+    if key == "left" or key == "a" then
+      if State.pauseSelection == 2 then Settings.adjustMaster(-.1) end
+      if State.pauseSelection == 3 then Settings.adjustSfx(-.1) end
+    end
+    if key == "right" or key == "d" then
+      if State.pauseSelection == 2 then Settings.adjustMaster(.1) end
+      if State.pauseSelection == 3 then Settings.adjustSfx(.1) end
+    end
+    if key == "return" or key == "space" then
+      if State.pauseSelection == 1 then State.mode = "playing" end
+      if State.pauseSelection == 4 then Settings.toggleMute() end
+    end
+    if key == "v" then Settings.cycleVolume() end
+    if key == "m" then Settings.toggleMute() end
+    return
+  end
   if State.mode ~= "playing" then return end
   if key == "space" or key == "w" or key == "up" then
     if Input.down() then Player.dropThrough(State.game.player) else Player.jump(State.game.player) end
@@ -255,7 +276,28 @@ end
 function State.gamepadpressed(_, button)
   if button == "start" then
     if State.mode == "title" or State.mode == "dead" or State.mode == "victory" then Save.clear(); State.game = newGame(); State.mode = "playing"
-    elseif State.mode == "playing" or State.mode == "paused" then State.mode = State.mode == "playing" and "paused" or "playing" end
+    elseif State.mode == "playing" or State.mode == "paused" then
+      State.mode = State.mode == "playing" and "paused" or "playing"
+      if State.mode == "paused" then State.pauseSelection = 1 end
+    end
+    return
+  end
+  if State.mode == "paused" then
+    if button == "dpup" then State.pauseSelection = State.pauseSelection == 1 and 4 or State.pauseSelection - 1 end
+    if button == "dpdown" then State.pauseSelection = State.pauseSelection == 4 and 1 or State.pauseSelection + 1 end
+    if button == "dpleft" then
+      if State.pauseSelection == 2 then Settings.adjustMaster(-.1) end
+      if State.pauseSelection == 3 then Settings.adjustSfx(-.1) end
+    end
+    if button == "dpright" then
+      if State.pauseSelection == 2 then Settings.adjustMaster(.1) end
+      if State.pauseSelection == 3 then Settings.adjustSfx(.1) end
+    end
+    if button == "a" then
+      if State.pauseSelection == 1 then State.mode = "playing" end
+      if State.pauseSelection == 4 then Settings.toggleMute() end
+    end
+    if button == "b" then State.mode = "playing" end
     return
   end
   if State.mode ~= "playing" then return end
@@ -382,6 +424,7 @@ function State.smokeTest()
   local canvas = love.graphics.newCanvas(1280, 720)
   love.graphics.setCanvas(canvas)
   drawWorld(game)
+  Menu.pause(Settings, 2)
   assert(#Assets.gothic.bosses.mire_priest.idle == 5, "Mire Priest animation frames missing")
   assert(#Assets.gothic.bosses.lord_celium.idle == 8 and #Assets.gothic.bosses.lord_celium.attack == 3, "Lord Celium animation frames missing")
   enterArea(game, "mountain")

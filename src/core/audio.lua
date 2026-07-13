@@ -1,4 +1,5 @@
 local Audio = { sounds = {} }
+local Settings = require("src.core.settings")
 
 local function tone(frequency, duration, volume, wave)
   local rate, samples = 22050, math.floor(22050 * duration)
@@ -22,8 +23,7 @@ end
 
 function Audio.play(name)
   local source = Audio.sounds[name]
-  if source then source:stop(); source:play() end
+  if source then source:stop(); source:setVolume(Settings.sfxVolume); source:play() end
 end
 
 return Audio
-
