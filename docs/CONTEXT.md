@@ -8,7 +8,7 @@ Title → opening lore cinematic → forest/moonstone quest → Forest Depths/Si
 
 ## Module map
 
-`core/state` owns lifecycle and panel transitions; `core/camera` owns the low-resolution canvas; `core/assets` owns Gothic animation/environment assets and fallbacks; `ui/cinematic` renders skippable layered story scenes from `data/lore`. `systems/platforms` creates stable runtime platforms and movement envelopes; `systems/collision` handles support tracking, one-way landings/drop-through, and solid walls; `systems/navigation` builds room-local platform graphs and A* routes for grounded enemies. Entities include player, six regular enemies, animated bosses, and animated Sillius. World modules define nine platform layouts and spawns.
+`core/state` owns app modes and dispatches normalized `core/actions`; `core/game_session` creates/restores runs and enters rooms; `systems/world_flow` owns objectives and transitions; `ui/world_renderer` owns gameplay draw order. `core/config` centralizes runtime constants, and `core/storage` backs compatible checkpoint/settings schemas. `systems/platforms` and `systems/collision` own platform runtime physics; `systems/navigation_graph` builds room-local spans, edges, and A* paths while `systems/navigation` executes them. `data/encounters` declares room content for `world/spawner`. Entities include Aren, six regular enemies, animated bosses, and Sillius.
 
 ## Controls
 
@@ -30,8 +30,11 @@ Platforms do not support slopes. Moving platforms use fixed sine paths, encounte
 - Enemy behavior: `src/entities/enemy.lua`, `src/entities/boss.lua`, `src/systems/ai.lua`
 - Sillius/chain spell: `src/entities/companion.lua`, `src/systems/combat.lua`
 - Map/collision: `src/world/levels.lua`, `src/systems/platforms.lua`, `src/systems/collision.lua`
-- Encounters: `src/world/spawner.lua`, `src/data/enemies.lua`, `src/data/bosses.lua`
+- Encounters: `src/data/encounters.lua`, `src/world/spawner.lua`, `src/world/validator.lua`
 - UI/dialogue: `src/ui/hud.lua`, `src/ui/dialogue.lua`, `src/ui/menu.lua`
 - Asset switching: `src/core/assets.lua`, `CREDITS.md`
-- State/transitions: `src/core/state.lua`
+- State/session/transitions: `src/core/state.lua`, `src/core/game_session.lua`, `src/systems/world_flow.lua`
+- Navigation: `src/systems/navigation_graph.lua`, `src/systems/navigation.lua`
+- Persistence/config: `src/core/storage.lua`, `src/core/save.lua`, `src/core/settings.lua`, `src/core/config.lua`
+- Automated checks: `tests/run.lua`, `tests/smoke.lua`, `.github/workflows/check.yml`
 - Quest/upgrades: `src/systems/quests.lua`, `src/systems/progression.lua`, `src/data/quests.lua`, `src/data/items.lua`

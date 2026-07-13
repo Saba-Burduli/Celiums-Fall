@@ -59,9 +59,12 @@ Create a portable LÖVE archive with `make build`. The result is `dist/celiums-f
 
 ## Roadmap
 
-Next priorities are audio, map readability, combat tuning, save data, richer dialogue, accessibility options, gamepad support, and packaged builds. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
+Next priorities are full-route traversal, combat, and accessibility playtesting; authored ambience; and platform-specific releases. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Validation
 
-Run `make check` or `./scripts/check.sh`. The check uses `luac` or `lua` when available and otherwise verifies required files.
-Run `make smoke` with LÖVE installed to load both asset sets and exercise every room plus the new progression systems.
+- `make check`: validate Lua syntax and run dependency-free unit tests.
+- `make smoke`: exercise assets, every room, traversal, navigation, progression, and rendering through LÖVE.
+- `make build && unzip -t dist/celiums-fall.love`: create and integrity-check the portable archive.
+
+GitHub Actions runs the same checks headlessly on pushes and pull requests.

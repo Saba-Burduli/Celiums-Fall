@@ -1,18 +1,23 @@
 # Architecture
 
-The project uses small table-returning modules and one controlled state object. `main.lua` only forwards LÖVE callbacks to `src/core/state.lua`.
+The project uses dependency-free Lua modules with narrow ownership. `main.lua` forwards LÖVE callbacks to `core/state` and runs the standalone smoke test when requested.
 
-- `src/core`: lifecycle, input, camera, shared math helpers
-- `src/entities`: constructors and entity-local update/draw behavior
-- `src/systems`: rules spanning multiple entities
-- `src/world`: static level definitions and encounter construction
-- `src/ui`: presentation with no gameplay ownership
-- `src/data`: declarative tuning tables
+- `src/core`: app state, session construction, normalized actions, configuration, persistence, camera, audio, assets, and shared helpers
+- `src/entities`: actor construction and entity-local behavior
+- `src/systems`: combat, navigation execution, world progression, collision, platforms, and other cross-entity rules
+- `src/world`: level definitions, runtime encounter construction, and validation
+- `src/ui`: world and interface rendering
+- `src/data`: declarative encounters, lore, quests, and tuning tables
+- `tests`: dependency-free unit harness and the LÖVE integration smoke test
 
-Dependencies flow from state → world/entities/systems/UI → data/core helpers. Data never imports gameplay modules. Systems should not own rendering. No ECS or external library is planned for the MVP.
+`core/state` owns application modes and callback dispatch. `core/actions` converts keyboard, controller, and mouse input into device-independent actions. `core/game_session` creates or restores a run and enters rooms. `systems/world_flow` owns objectives, interactions, transitions, and win/death outcomes. `ui/world_renderer` owns gameplay draw order.
 
-`core/save` persists a small versioned checkpoint through `love.filesystem`; `core/settings` owns persisted audio preferences; `core/audio` generates short sound effects in memory. None requires bundled assets.
+`core/config` is the source of truth for world, render, physics, and navigation constants. `core/storage` provides deterministic key-value encoding and filesystem access; `core/save` and `core/settings` define their own compatible schemas on top of it. Checkpoint version 1 and legacy settings remain readable.
 
-`core/assets` loads GothicVania environment pieces, frame sequences, enemies, spell effects, and fallback sheets behind semantic draw calls. `core/camera` renders the full game to a 640×360 canvas before nearest-neighbor scaling. `systems/platforms` gives runtime platforms stable IDs and movement envelopes, animates them, and carries supported actors. `systems/collision` applies gravity, support tracking, selective one-way ignores, and axis-aligned wall blocking. `systems/navigation` splits walkable spans around walls, connects validated jump/drop/boarding transitions, runs A*, and executes routes for grounded regular enemies; bosses and flying/teleporting archetypes bypass it.
+`data/encounters` declares room content, while `world/spawner` turns those declarations into runtime entities. `world/validator` checks level and encounter references without owning construction.
 
-`data/lore` owns cinematic copy while `ui/cinematic` owns its layered in-engine presentation and input-independent page state. `core/state` only starts, advances, and pauses gameplay for those scenes.
+`systems/platforms` gives platforms stable IDs and movement envelopes. `systems/collision` owns gravity, support tracking, selective one-way ignores, and solid-wall blocking. `systems/navigation_graph` builds walkable spans and validated edges and runs A*. `systems/navigation` only plans and executes actor routes. Bosses and flying or teleporting archetypes bypass grounded navigation.
+
+`core/assets` exposes semantic drawing operations over the GothicVania and fallback art. `core/camera` renders at 640×360 before nearest-neighbor scaling. `ui/fonts` caches the shared pixel font. `data/lore` owns story copy, while `ui/cinematic` owns its presentation and page state.
+
+Run `make check` for syntax and unit coverage, `make smoke` for integration coverage, and `make build` followed by `unzip -t dist/celiums-fall.love` for package integrity. CI runs all four checks headlessly.

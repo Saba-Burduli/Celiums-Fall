@@ -31,3 +31,5 @@
 - [x] Expand the route with Thornwatch Ruins, Drowned Ossuary, and Black Keep.
 - [x] Add a navigable pause menu with persisted master and SFX audio controls.
 - [x] Add skippable in-engine lore cinematics at major story thresholds.
+- [x] Refactor runtime ownership into focused session, flow, rendering, actions, storage, encounter, and navigation modules.
+- [x] Add dependency-free unit tests plus headless gameplay and package-integrity CI checks.

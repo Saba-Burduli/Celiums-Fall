@@ -29,3 +29,4 @@
 - Replaced pause shortcuts with a navigable menu for master volume, SFX volume, and mute.
 - Added layered in-engine cinematics clarifying Aren's betrayal, the Ashen Covenant, the veil, and each major story threshold.
 - Added a current 1280×720 summit gameplay screenshot to the README.
+- Refactored runtime ownership into focused modules, centralized configuration and storage, made encounters declarative, and added dependency-free unit, headless gameplay, and archive-integrity checks.
