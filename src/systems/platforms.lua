@@ -56,14 +56,4 @@ function Platforms.update(runtime, dt, riders)
   end
 end
 
-function Platforms.validate(level)
-  for _, platform in ipairs(level.platforms or {}) do
-    if platform.w < 120 or platform.y < 330 or platform.y > Config.world.groundY then return false end
-  end
-  for _, platform in ipairs(level.movingPlatforms or {}) do
-    if platform.w < 100 or (platform.range or 0) > 110 then return false end
-  end
-  return true
-end
-
 return Platforms
