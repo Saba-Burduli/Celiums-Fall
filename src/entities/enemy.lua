@@ -1,4 +1,5 @@
 local Defs = require("src.data.enemies")
+local Config = require("src.core.config")
 local Utils = require("src.core.utils")
 local Projectile = require("src.entities.projectile")
 local Collision = require("src.systems.collision")
@@ -65,7 +66,9 @@ function Enemy.update(e, player, projectiles, level, dt)
     e.x = oldX
     Collision.moveHorizontal(e, movement, level.walls)
   end
-  if e.behavior ~= "flying" and e.behavior ~= "teleport" then Collision.applyPlatformPhysics(e, level.platforms, dt, 1450) end
+  if e.behavior ~= "flying" and e.behavior ~= "teleport" then
+    Collision.applyPlatformPhysics(e, level.platforms, dt, Config.physics.actorGravity)
+  end
 end
 
 function Enemy.draw(e, assets)

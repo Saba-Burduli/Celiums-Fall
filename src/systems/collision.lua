@@ -1,9 +1,12 @@
 local Utils = require("src.core.utils")
+local Config = require("src.core.config")
 local Collision = {}
 
 function Collision.near(a, b, range) return Utils.distance(a, b) <= range end
 function Collision.overlap(a, b) return Utils.circleHit(a, b) end
-function Collision.inBounds(e) return e.x > -40 and e.x < 1320 and e.y > 20 and e.y < 760 end
+function Collision.inBounds(e)
+  return e.x > -40 and e.x < Config.world.width + 40 and e.y > 20 and e.y < Config.physics.deathY
+end
 
 function Collision.moveHorizontal(entity, amount, walls)
   local halfWidth = entity.halfWidth or entity.radius or 12
@@ -19,14 +22,15 @@ function Collision.moveHorizontal(entity, amount, walls)
       end
     end
   end
-  entity.x = Utils.clamp(nextX, halfWidth + 5, 1275 - halfWidth)
+  entity.x = Utils.clamp(nextX, halfWidth + Config.world.edgePadding,
+    Config.world.width - Config.world.edgePadding - halfWidth)
 end
 
 function Collision.applyPlatformPhysics(entity, platforms, dt, gravity)
   local halfWidth = entity.halfWidth or entity.radius or 12
   local halfHeight = entity.halfHeight or entity.radius or 16
   local previousBottom = entity.y + halfHeight
-  entity.vy = (entity.vy or 0) + (gravity or 1450) * dt
+  entity.vy = (entity.vy or 0) + (gravity or Config.physics.actorGravity) * dt
   local nextY = entity.y + entity.vy * dt
   local nextBottom = nextY + halfHeight
   entity.onGround = false

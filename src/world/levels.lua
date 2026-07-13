@@ -1,4 +1,5 @@
-local ground = { x = 0, y = 632, w = 1280, h = 88 }
+local Config = require("src.core.config")
+local ground = { x = 0, y = Config.world.groundY, w = Config.world.width, h = Config.world.groundHeight }
 
 return {
   forest = {

@@ -1,7 +1,10 @@
 local Collision = require("src.systems.collision")
+local Config = require("src.core.config")
 local Navigation = {}
 
-local MARGIN, MAX_RISE, MAX_GAP = 18, 145, 255
+local MARGIN = Config.navigation.platformMargin
+local MAX_RISE = Config.navigation.maxRise
+local MAX_GAP = Config.navigation.maxGap
 
 local function bounds(node, envelope)
   local p = node.platform
@@ -157,7 +160,8 @@ function Navigation.update(e, player, runtime, dt, preferredDistance)
   nav.currentNode = current.id
   if nav.replanTimer == 0 or nav.goalNode ~= goal.id or not nav.route then
     local goalChanged = nav.goalNode ~= goal.id
-    nav.route, nav.waypoint, nav.goalNode, nav.replanTimer = Navigation.route(runtime, current.id, goal.id), 1, goal.id, .35
+    nav.route, nav.waypoint, nav.goalNode, nav.replanTimer = Navigation.route(runtime, current.id, goal.id),
+      1, goal.id, Config.navigation.replanInterval
     if goalChanged then nav.waitTime, nav.waitState = 0, nil end
   end
   if not nav.route then return true end
@@ -197,14 +201,17 @@ function Navigation.update(e, player, runtime, dt, preferredDistance)
     local reachable = actualGap <= MAX_GAP and current.platform.y - target.platform.y <= MAX_RISE
     if edge.kind == "board" and not reachable then
       nav.waitState, nav.waitTime = "waiting_for_platform", nav.waitTime + dt
-      if nav.waitTime > 2 then nav.route, nav.replanTimer, nav.waitTime = nil, 0, 0 end
+      if nav.waitTime > Config.navigation.blockedReplanTime then
+        nav.route, nav.replanTimer, nav.waitTime = nil, 0, 0
+      end
       return true
     end
     nav.waitState, nav.waitTime = nil, 0
     safeMove(e, current, launchX, e.speed, dt)
     if math.abs(e.x - launchX) < 10 and e.onGround then
       nav.airTargetX = targetX
-      e.vy, e.onGround, e.supportingPlatform, e.supportingPlatformId = -650, false, nil, nil
+      e.vy, e.onGround, e.supportingPlatform, e.supportingPlatformId =
+        -Config.physics.enemyJumpImpulse, false, nil, nil
     end
   end
   return true

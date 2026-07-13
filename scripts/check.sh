@@ -6,10 +6,11 @@ if command -v luac >/dev/null 2>&1; then
     luac -p "$file"
   done
   echo "Lua syntax check passed."
+  lua tests/run.lua
 elif command -v lua >/dev/null 2>&1; then
   lua scripts/check.lua
+  lua tests/run.lua
 else
   echo "No Lua interpreter found; checked required files only."
   for file in main.lua conf.lua docs/CONTEXT.md docs/TASKS.md; do test -f "$file"; done
 fi
-

@@ -1,4 +1,5 @@
 local Utils = require("src.core.utils")
+local Config = require("src.core.config")
 local M = {}
 
 function M.move()
@@ -38,7 +39,7 @@ function M.aim(player)
     if Utils.length(jx, jy) > .25 then return Utils.normalize(jx, jy) end
   end
   local mx, my = love.mouse.getPosition()
-  local sx, sy = love.graphics.getWidth() / 1280, love.graphics.getHeight() / 720
+  local sx, sy = love.graphics.getWidth() / Config.world.width, love.graphics.getHeight() / Config.world.height
   return Utils.normalize(mx / sx - player.x, my / sy - player.y)
 end
 

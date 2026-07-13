@@ -1,3 +1,4 @@
+local Config = require("src.core.config")
 local Platforms = {}
 
 local function clone(source)
@@ -11,7 +12,8 @@ function Platforms.create(level)
   for index, platform in ipairs(level.platforms or {}) do
     local static = clone(platform)
     static.id = "static:" .. index
-    static.oneWay = static.oneWay ~= false and not (static.y >= 620 and static.h >= 60)
+    static.oneWay = static.oneWay ~= false and not
+      (static.y >= Config.world.groundY - 12 and static.h >= Config.world.groundHeight - 28)
     static.minX, static.maxX, static.minY, static.maxY = static.x, static.x, static.y, static.y
     table.insert(runtime.platforms, static)
   end
@@ -56,7 +58,7 @@ end
 
 function Platforms.validate(level)
   for _, platform in ipairs(level.platforms or {}) do
-    if platform.w < 120 or platform.y < 330 or platform.y > 632 then return false end
+    if platform.w < 120 or platform.y < 330 or platform.y > Config.world.groundY then return false end
   end
   for _, platform in ipairs(level.movingPlatforms or {}) do
     if platform.w < 100 or (platform.range or 0) > 110 then return false end

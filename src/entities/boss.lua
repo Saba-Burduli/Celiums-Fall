@@ -1,4 +1,5 @@
 local Defs = require("src.data.bosses")
+local Config = require("src.core.config")
 local Utils = require("src.core.utils")
 local Projectile = require("src.entities.projectile")
 local Collision = require("src.systems.collision")
@@ -65,7 +66,7 @@ function Boss.update(b, player, projectiles, enemies, level, dt)
   local movement = b.x - oldX
   b.x = oldX
   Collision.moveHorizontal(b, movement, level.walls)
-  Collision.applyPlatformPhysics(b, level.platforms, dt, 1450)
+  Collision.applyPlatformPhysics(b, level.platforms, dt, Config.physics.actorGravity)
 end
 
 function Boss.draw(b, assets)

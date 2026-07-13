@@ -1,4 +1,5 @@
 local Input = require("src.core.input")
+local Config = require("src.core.config")
 local Collision = require("src.systems.collision")
 local Player = {}
 
@@ -21,9 +22,9 @@ function Player.update(p, level, dt)
   if move ~= 0 then p.facing = move > 0 and 1 or -1 end
   if p.dashTime > 0 then p.vx = p.facing * p.speed * 2.7 else p.vx = move * p.speed end
   Collision.moveHorizontal(p, p.vx * dt, level.walls)
-  Collision.applyPlatformPhysics(p, level.platforms, dt, 1500)
+  Collision.applyPlatformPhysics(p, level.platforms, dt, Config.physics.playerGravity)
   p.coyote = p.onGround and .11 or math.max(0, p.coyote - dt)
-  if p.y > 760 then p.hp = 0 end
+  if p.y > Config.physics.deathY then p.hp = 0 end
   local ax, ay = Input.aim(p)
   if ax ~= 0 or ay ~= 0 then p.aimX, p.aimY = ax, ay
   else p.aimX, p.aimY = p.facing, 0 end
@@ -31,7 +32,7 @@ end
 
 function Player.jump(p)
   if p.coyote <= 0 then return false end
-  p.vy, p.onGround, p.coyote = -670, false, 0
+  p.vy, p.onGround, p.coyote = -Config.physics.playerJumpImpulse, false, 0
   return true
 end
 

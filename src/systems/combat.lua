@@ -1,4 +1,5 @@
 local Utils = require("src.core.utils")
+local Config = require("src.core.config")
 local Projectile = require("src.entities.projectile")
 local Camera = require("src.core.camera")
 local Combat = {}
@@ -98,7 +99,8 @@ function Combat.update(game, dt)
   for i = #game.projectiles, 1, -1 do
     local shot = game.projectiles[i]
     Projectile.update(shot, dt)
-    local remove = shot.life <= 0 or shot.x < 0 or shot.x > 1280 or shot.y < 40 or shot.y > 720
+    local remove = shot.life <= 0 or shot.x < 0 or shot.x > Config.world.width
+      or shot.y < 40 or shot.y > Config.world.height
     if not remove and shot.owner == "enemy" and Utils.circleHit(shot, p) then Combat.damagePlayer(game, shot.damage); remove = true end
     if not remove and (shot.owner == "player" or shot.owner == "ally") then
       for _, e in ipairs(game.enemies) do

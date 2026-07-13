@@ -1,0 +1,20 @@
+local Helper = require("tests.test_helper")
+local Utils = require("src.core.utils")
+
+Helper.test("normalize returns a unit vector", function()
+  local x, y = Utils.normalize(3, 4)
+  Helper.near(x, .6, .0001)
+  Helper.near(y, .8, .0001)
+end)
+
+Helper.test("normalize keeps a zero vector stable", function()
+  local x, y = Utils.normalize(0, 0)
+  Helper.equal(x, 0)
+  Helper.equal(y, 0)
+end)
+
+Helper.test("clamp respects both bounds", function()
+  Helper.equal(Utils.clamp(-2, 0, 10), 0)
+  Helper.equal(Utils.clamp(12, 0, 10), 10)
+  Helper.equal(Utils.clamp(4, 0, 10), 4)
+end)
