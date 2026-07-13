@@ -1,11 +1,12 @@
 local State = require("src.core.state")
+local Smoke = require("tests.smoke")
 
 function love.load(args)
   love.graphics.setDefaultFilter("nearest", "nearest")
   State.load()
   for _, value in ipairs(args or {}) do
     if value == "--smoke" then
-      local ok, err = xpcall(State.smokeTest, debug.traceback)
+      local ok, err = xpcall(Smoke.run, debug.traceback)
       love.graphics.setCanvas()
       if not ok then print(err) end
       love.event.quit(ok and 0 or 1)
