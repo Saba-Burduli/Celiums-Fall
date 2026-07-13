@@ -1,13 +1,19 @@
 name: Check
 on: [push, pull_request]
 jobs:
-  lua-syntax:
+  quality:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install Lua
-        run: sudo apt-get update && sudo apt-get install -y lua5.4
-      - name: Check Lua syntax
+      - name: Install runtime and test tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.4 love xvfb unzip
+      - name: Check syntax and unit tests
         run: make check
+      - name: Run headless gameplay smoke test
+        run: xvfb-run -a love . --smoke
       - name: Package game
         run: make build
+      - name: Verify game archive
+        run: unzip -t dist/celiums-fall.love
