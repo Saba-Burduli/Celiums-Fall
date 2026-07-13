@@ -1,4 +1,5 @@
 local Config = require("src.core.config")
+local Graph = require("src.systems.navigation_graph")
 local Platforms = {}
 
 local function clone(source)
@@ -30,7 +31,7 @@ function Platforms.create(level)
     else moving.minX, moving.maxX = moving.baseX - (moving.range or 60), moving.baseX + (moving.range or 60) end
     table.insert(runtime.platforms, moving)
   end
-  runtime.navigation = require("src.systems.navigation").build(runtime)
+  runtime.navigation = Graph.build(runtime)
   return runtime
 end
 

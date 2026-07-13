@@ -1,6 +1,8 @@
 local Camera = require("src.core.camera")
 local Input = require("src.core.input")
 local Player = require("src.entities.player")
+local Boss = require("src.entities.boss")
+local Enemy = require("src.entities.enemy")
 local Projectile = require("src.entities.projectile")
 local Item = require("src.entities.item")
 local Levels = require("src.world.levels")
@@ -22,6 +24,7 @@ local Assets = require("src.core.assets")
 local Companion = require("src.entities.companion")
 local Platforms = require("src.systems.platforms")
 local Navigation = require("src.systems.navigation")
+local NavigationGraph = require("src.systems.navigation_graph")
 
 local State = { mode = "title", pauseSelection = 1 }
 
@@ -206,8 +209,8 @@ local function drawWorld(game)
   if Companion.present(game.companion, game.area) then Companion.draw(game.companion, Assets) end
   for _, item in ipairs(game.items) do Item.draw(item, Assets) end
   for _, shot in ipairs(game.projectiles) do Projectile.draw(shot, Assets) end
-  for _, enemy in ipairs(game.enemies) do if not enemy.dead then require("src.entities.enemy").draw(enemy, Assets) end end
-  if game.boss and not game.boss.dead then require("src.entities.boss").draw(game.boss, Assets) end
+  for _, enemy in ipairs(game.enemies) do if not enemy.dead then Enemy.draw(enemy, Assets) end end
+  if game.boss and not game.boss.dead then Boss.draw(game.boss, Assets) end
   Player.draw(game.player, Assets)
   if game.meleeFlash > 0 then
     local p = game.player; love.graphics.setColor(.8, .65, .95, .5)
@@ -396,12 +399,12 @@ function State.smokeTest()
     onGround = true, supportingPlatform = traversal.platforms[1], supportingPlatformId = "static:1" }
   local routePlayer = { x = 570, y = 375, halfWidth = 13, halfHeight = 25, onGround = true,
     supportingPlatform = traversal.platforms[3], supportingPlatformId = "static:3" }
-  local startNode, goalNode = Navigation.nodeFor(traversal, routeEnemy), Navigation.nodeFor(traversal, routePlayer)
-  local route = Navigation.route(traversal, startNode.id, goalNode.id)
+  local startNode = NavigationGraph.nodeFor(traversal, routeEnemy)
+  local goalNode = NavigationGraph.nodeFor(traversal, routePlayer)
+  local route = NavigationGraph.route(traversal, startNode.id, goalNode.id)
   assert(route and #route > 1, "grounded enemy did not find a multi-platform route")
   Navigation.update(routeEnemy, routePlayer, traversal, .016)
   assert(routeEnemy.nav and routeEnemy.nav.route, "grounded enemy route state was not retained")
-  local Enemy = require("src.entities.enemy")
   local climber = Enemy.new("shadow_thrall", 100, 616)
   climber.onGround, climber.supportingPlatform, climber.supportingPlatformId = true, traversal.platforms[1], "static:1"
   for _ = 1, 720 do Enemy.update(climber, routePlayer, {}, traversal, .016) end

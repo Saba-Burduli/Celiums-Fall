@@ -21,7 +21,8 @@ local function radial(b, projectiles, count, speed)
   end
 end
 
-function Boss.update(b, player, projectiles, enemies, level, dt)
+function Boss.update(b, player, projectiles, level, dt)
+  local summons = {}
   local oldX = b.x
   b.animTime = b.animTime + dt
   b.attackTimer, b.summonTimer = b.attackTimer - dt, b.summonTimer - dt
@@ -46,14 +47,9 @@ function Boss.update(b, player, projectiles, enemies, level, dt)
     b.attackTimer = b.baseCooldown / pace
   end
   if b.summonTimer <= 0 then
-    local Enemy = require("src.entities.enemy")
     local kind = b.kind == "mire_priest" and "cursed_hound" or "shadow_thrall"
-    local alive = 0
-    for _, enemy in ipairs(enemies) do if not enemy.dead then alive = alive + 1 end end
-    if alive < 6 then
-      table.insert(enemies, Enemy.new(kind, b.x + 55, b.y + 20))
-      if b.phase == 2 and alive < 5 then table.insert(enemies, Enemy.new("cursed_hound", b.x - 55, b.y - 20)) end
-    end
+    summons[#summons + 1] = { kind = kind, x = b.x + 55, y = b.y + 20 }
+    if b.phase == 2 then summons[#summons + 1] = { kind = "cursed_hound", x = b.x - 55, y = b.y - 20 } end
     b.summonTimer = b.kind == "mire_priest" and 6 or 5
   end
   if b.kind == "lord_celium" and b.chargeWindup <= 0 then
@@ -67,6 +63,7 @@ function Boss.update(b, player, projectiles, enemies, level, dt)
   b.x = oldX
   Collision.moveHorizontal(b, movement, level.walls)
   Collision.applyPlatformPhysics(b, level.platforms, dt, Config.physics.actorGravity)
+  return summons
 end
 
 function Boss.draw(b, assets)
