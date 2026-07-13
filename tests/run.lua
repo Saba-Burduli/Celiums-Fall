@@ -7,5 +7,6 @@ require("tests.world_test")
 require("tests.navigation_test")
 require("tests.ai_test")
 require("tests.session_test")
+require("tests.world_flow_test")
 
 print(("Lua unit tests passed: %d"):format(Helper.count))

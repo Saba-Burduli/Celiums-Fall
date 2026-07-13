@@ -11,8 +11,7 @@ local Validator = require("src.world.validator")
 local AI = require("src.systems.ai")
 local Combat = require("src.systems.combat")
 local Collision = require("src.systems.collision")
-local Quests = require("src.systems.quests")
-local Progression = require("src.systems.progression")
+local WorldFlow = require("src.systems.world_flow")
 local Hud = require("src.ui.hud")
 local Dialogue = require("src.ui.dialogue")
 local Cinematic = require("src.ui.cinematic")
@@ -28,83 +27,9 @@ local NavigationGraph = require("src.systems.navigation_graph")
 
 local State = { mode = "title", pauseSelection = 1 }
 
-local function currentObjective(game)
-  if game.companion.status == "active" then return "Sillius: eliminate the faction patrol." end
-  if game.companion.status == "ready" then return "Return to Sillius in the Forest Depths." end
-  if game.companion.status == "unmet" and game.area == "forest_depths" then return "Speak with the stranded faction occultist." end
-  return Quests.objective(game.quest)
-end
-
 function State.load()
   Settings.load(); Audio.load(); Assets.load()
   State.mode, State.hasSave = "title", Save.exists()
-end
-
-local function interact(game)
-  local p = game.player
-  if Companion.present(game.companion, game.area) and Collision.near(p, game.companion, 65) then
-    local s = game.companion
-    if s.status == "unmet" then
-      s.status = "active"
-      GameSession.notify(game, "Sillius: Still saving strangers, Aren? Kill this patrol and I'll make myself useful.")
-    elseif s.status == "active" and GameSession.livingEnemyCount(game) > 0 then
-      GameSession.notify(game, "Sillius: The sarcastic reunion can continue after the screaming stops.")
-    elseif s.status == "active" or s.status == "ready" then
-      s.status, p.chainUnlocked = "allied", true
-      GameSession.notify(game, "Sillius joins you. Chain Lightning unlocked [L]. Try not to look impressed.")
-      game.audio.play("stone")
-    else
-      GameSession.notify(game, "Sillius: Lead on. I promise to criticize your technique quietly.")
-    end
-    Save.write(game); return
-  end
-  if game.area == "forest" and Collision.near(p, { x = 175, y = 600 }, 65) then
-    GameSession.notify(game, Quests.interact(game.quest, p)); Save.write(game); return
-  end
-  for _, item in ipairs(game.items) do
-    if not item.collected and Collision.near(p, item, 45) then
-      if item.questItem then
-        if Quests.takeMoonstone(game.quest) then item.collected = true; GameSession.notify(game, "Lost Moonstone recovered."); game.audio.play("stone")
-        else GameSession.notify(game, "A pale stone. Someone may be searching for it.") end
-      else
-        local text = Progression.collect(p, item)
-        if text then GameSession.notify(game, text); game.audio.play("stone") end
-      end
-      Save.write(game)
-      return
-    end
-  end
-end
-
-local function updatePrompt(game)
-  game.prompt = nil
-  if Companion.present(game.companion, game.area) and Collision.near(game.player, game.companion, 65) then
-    game.prompt = game.companion.status == "allied" and "Speak with Sillius" or "Ask Sillius about the patrol"
-  end
-  if game.area == "forest" and Collision.near(game.player, { x = 175, y = 600 }, 65) then game.prompt = "Speak with Old Villager" end
-  for _, item in ipairs(game.items) do
-    if not item.collected and Collision.near(game.player, item, 45) then game.prompt = item.questItem and "Take lost moonstone" or "Absorb stone" end
-  end
-end
-
-local function transition(game)
-  local exit = game.level.exit
-  if not exit or not Collision.near(game.player, exit, 45) then return end
-  if game.area == "forest_depths" and game.companion.status == "active"
-      and GameSession.livingEnemyCount(game) == 0 then
-    game.companion.status = "ready"
-  end
-  if game.area == "forest_depths" and game.companion.status ~= "allied" then
-    game.player.x = 1170
-    GameSession.notify(game, "Sillius: Leaving already? The patrol still owns this road.")
-    return
-  end
-  if game.area == "shrine" and not game.mireDead then
-    game.player.x = 1170
-    GameSession.notify(game, "The Mire Priest's ward seals the crypt.")
-    return
-  end
-  if game.level.next then GameSession.enterArea(game, game.level.next); Save.write(game) end
 end
 
 function State.update(dt)
@@ -121,29 +46,13 @@ function State.update(dt)
   if game.messageTimer == 0 then game.message = nil end
   for _, item in ipairs(game.items) do Item.update(item, dt) end
   AI.update(game.enemies, game.boss, p, game.projectiles, game.physics, dt)
-  if game.companion.status == "active" and game.area == "forest_depths"
-      and GameSession.livingEnemyCount(game) == 0 then
-    game.companion.status = "ready"
-  end
   Companion.update(game.companion, game, dt)
   Combat.update(game, dt)
-  if game.boss and game.boss.dead then
-    if game.boss.kind == "mire_priest" and not game.mireDead then
-      game.mireDead = true
-      GameSession.notify(game, "Mire Priest slain — the mountain ward is broken.")
-      game.audio.play("boss")
-      Save.write(game)
-    end
-    if game.boss.kind == "lord_celium" then Save.clear(); game.audio.play("victory"); State.hasSave = false; State.mode = "victory"; return end
+  local outcome = WorldFlow.update(game)
+  if outcome then
+    State.mode = outcome
+    if outcome == "victory" then State.hasSave = false end
   end
-  if game.boss and game.boss.phaseChanged then
-    game.boss.phaseChanged = false
-    GameSession.notify(game, "Lord Celium tears open the veil — his final phase begins.")
-    game.audio.play("boss")
-  end
-  if p.hp <= 0 then State.mode = "dead"; return end
-  updatePrompt(game); transition(game)
-  game.questObjective = currentObjective(game)
 end
 
 local function drawWorld(game)
@@ -241,7 +150,7 @@ function State.keypressed(key)
   if key == "j" then Combat.melee(State.game) end
   if key == "k" then Combat.magic(State.game) end
   if key == "l" then Combat.chainLightning(State.game) end
-  if key == "e" then interact(State.game) end
+  if key == "e" then WorldFlow.interact(State.game) end
 end
 
 function State.gamepadpressed(_, button)
@@ -284,7 +193,7 @@ function State.gamepadpressed(_, button)
   if button == "y" then Combat.magic(State.game) end
   if button == "rightshoulder" then Combat.chainLightning(State.game) end
   if button == "b" and Player.dash(State.game.player) then State.game.audio.play("dash") end
-  if button == "leftshoulder" then interact(State.game) end
+  if button == "leftshoulder" then WorldFlow.interact(State.game) end
 end
 
 function State.mousepressed(_, _, button)
