@@ -2,9 +2,7 @@ local Camera = require("src.core.camera")
 local GameSession = require("src.core.game_session")
 local Input = require("src.core.input")
 local Player = require("src.entities.player")
-local Boss = require("src.entities.boss")
 local Enemy = require("src.entities.enemy")
-local Projectile = require("src.entities.projectile")
 local Item = require("src.entities.item")
 local Levels = require("src.world.levels")
 local Validator = require("src.world.validator")
@@ -13,6 +11,7 @@ local Combat = require("src.systems.combat")
 local Collision = require("src.systems.collision")
 local WorldFlow = require("src.systems.world_flow")
 local Hud = require("src.ui.hud")
+local WorldRenderer = require("src.ui.world_renderer")
 local Dialogue = require("src.ui.dialogue")
 local Cinematic = require("src.ui.cinematic")
 local Menu = require("src.ui.menu")
@@ -55,51 +54,12 @@ function State.update(dt)
   end
 end
 
-local function drawWorld(game)
-  Assets.drawBackdrop(game.level)
-  Assets.drawPlatforms(game.physics)
-  for _, hazard in ipairs(game.level.hazards or {}) do
-    love.graphics.setColor(.65, .04, .18, .25 + math.sin(love.timer.getTime() * 4) * .08)
-    love.graphics.circle("fill", hazard.x, hazard.y, hazard.radius)
-    love.graphics.setColor(.95, .18, .28, .8); love.graphics.circle("line", hazard.x, hazard.y, hazard.radius)
-  end
-  if game.level.exit then
-    local open = game.area ~= "shrine" or game.mireDead
-    love.graphics.setColor(open and { .35, .42, .58, .7 } or { .45, .08, .16, .8 })
-    love.graphics.rectangle("fill", 1215, 510, 35, 122)
-    love.graphics.push(); love.graphics.translate(1202, 615); love.graphics.rotate(-math.pi / 2)
-    love.graphics.setColor(.7, .68, .76); love.graphics.print(game.level.exit.label, 0, 0); love.graphics.pop()
-  end
-  if game.area == "forest" then
-    if not Assets.draw("villager", 175, 600, 1.1) then love.graphics.setColor(.48, .4, .32); love.graphics.circle("fill", 175, 600, 17) end
-    love.graphics.setColor(.7, .65, .6); love.graphics.print("Old Villager", 128, 565)
-  end
-  if Companion.present(game.companion, game.area) then Companion.draw(game.companion, Assets) end
-  for _, item in ipairs(game.items) do Item.draw(item, Assets) end
-  for _, shot in ipairs(game.projectiles) do Projectile.draw(shot, Assets) end
-  for _, enemy in ipairs(game.enemies) do if not enemy.dead then Enemy.draw(enemy, Assets) end end
-  if game.boss and not game.boss.dead then Boss.draw(game.boss, Assets) end
-  Player.draw(game.player, Assets)
-  if game.meleeFlash > 0 then
-    local p = game.player; love.graphics.setColor(.8, .65, .95, .5)
-    love.graphics.arc("line", "open", p.x, p.y, 45, math.atan2(p.aimY, p.aimX) - .8, math.atan2(p.aimY, p.aimX) + .8)
-  end
-  for _, q in ipairs(game.particles) do love.graphics.setColor(q.color[1], q.color[2], q.color[3], q.life / .35); love.graphics.circle("fill", q.x, q.y, 3) end
-  for _, bolt in ipairs(game.lightning) do
-    love.graphics.setColor(.5, .9, 1, math.min(1, bolt.life * 8)); love.graphics.setLineWidth(4)
-    love.graphics.line(bolt.x1, bolt.y1, (bolt.x1 + bolt.x2) / 2 + love.math.random(-8, 8), (bolt.y1 + bolt.y2) / 2 + love.math.random(-8, 8), bolt.x2, bolt.y2)
-    love.graphics.setLineWidth(1)
-  end
-  love.graphics.setColor(.12, .1, .16, .13)
-  for i = 1, 16 do love.graphics.circle("fill", (i * 97 + love.timer.getTime() * 7) % 1280, (i * 173) % 720, 45 + i % 3 * 20) end
-end
-
 function State.draw()
   Camera.beginDraw()
   if State.mode == "title" or State.mode == "dead" or State.mode == "victory" then
     Menu.draw(State.mode); Camera.endDraw(); return
   end
-  drawWorld(State.game)
+  WorldRenderer.draw(State.game)
   Hud.draw(State.game)
   Dialogue.draw(State.game.message)
   Cinematic.draw(State.game)
@@ -312,7 +272,7 @@ function State.smokeTest()
   Combat.update(game, .016)
   local canvas = love.graphics.newCanvas(1280, 720)
   love.graphics.setCanvas(canvas)
-  drawWorld(game)
+  WorldRenderer.draw(game)
   Menu.pause(Settings, 2)
   game.seenCinematics.black_keep = nil
   assert(Cinematic.start(game, "black_keep"), "Black Keep lore cinematic did not start")
@@ -325,7 +285,7 @@ function State.smokeTest()
   local bossTimer = game.boss.attackTimer
   AI.update(game.enemies, game.boss, game.player, game.projectiles, game.physics, .016)
   assert(game.boss.attackTimer < bossTimer and not game.boss.nav, "boss authored update regressed")
-  drawWorld(game)
+  WorldRenderer.draw(game)
   love.graphics.setCanvas()
   print("Celium's Fall smoke test passed: drop-through, platform A*, moving-platform waits, 9 panels, bosses/Sillius")
 end
