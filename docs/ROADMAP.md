@@ -14,7 +14,8 @@
 - [x] Gamepad support
 - [x] More rooms, enemy variants, and environmental hazards
 - [x] Portable `.love` packaging
-- [ ] Platform-specific releases and screenshots
+- [ ] Platform-specific releases
+- [x] Gameplay screenshots
 - [ ] Full 15-minute balance and accessibility playtest
 - [x] Side-view platformer conversion and cohesive Gothic pixel-art presentation
 - [x] Moving platforms, solid wall collision, and animated boss/Sillius frames

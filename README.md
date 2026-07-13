@@ -2,6 +2,8 @@
 
 A side-view dark fantasy action-platformer built with LÖVE. Aren, a former occult servant, jumps and fights across cursed forests, ruined churches, crypts, and Black Mountain while turning corrupted magic against Lord Celium's faction.
 
+![Celium's Fall gameplay at Lord Celium's summit](screenshots/gameplay.png)
+
 ## Install and run
 
 Install LÖVE 11.4+ from [love2d.org](https://love2d.org/) or with your system package manager. Then run:
