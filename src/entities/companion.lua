@@ -9,7 +9,8 @@ end
 
 function Companion.present(c, area)
   if area == "forest_depths" then return true end
-  return c.status == "allied" and (area == "shrine" or area == "shrine_crypt" or area == "mountain_path")
+  return c.status == "allied" and (area == "forest_ruins" or area == "shrine" or area == "shrine_crypt"
+    or area == "ossuary" or area == "mountain_path" or area == "black_keep")
 end
 
 function Companion.update(c, game, dt)

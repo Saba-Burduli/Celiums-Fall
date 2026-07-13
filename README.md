@@ -36,7 +36,7 @@ No external assets or Lua packages are required. To publish later, add a remote 
 - Title, play, pause, death, restart, and victory states
 - Side-view platforming with gravity, coyote-time jumping, drop-through ledges, moving platforms, solid walls, and aerial combat
 - Three connected areas: Cursed Forest, Ruined Shrine, Black Mountain
-- Six rooms across the forest, shrine, and mountain route
+- Nine rooms across the forest, shrine, and mountain route
 - Aren movement, dash, melee, magic, health, and mana
 - Three regular enemies and two bosses with distinct behaviors
 - Shielded Knight, Rift Witch, and Winged Curse enemy archetypes

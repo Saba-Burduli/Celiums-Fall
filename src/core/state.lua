@@ -277,7 +277,8 @@ end
 
 function State.smokeTest()
   local game = newGame()
-  local rooms = { "forest", "forest_depths", "shrine", "shrine_crypt", "mountain_path", "mountain" }
+  local rooms = { "forest", "forest_depths", "forest_ruins", "shrine", "shrine_crypt", "ossuary",
+    "mountain_path", "black_keep", "mountain" }
   for _, room in ipairs(rooms) do
     enterArea(game, room)
     assert(game.level and game.level.name, "missing room: " .. room)
@@ -389,7 +390,7 @@ function State.smokeTest()
   assert(game.boss.attackTimer < bossTimer and not game.boss.nav, "boss authored update regressed")
   drawWorld(game)
   love.graphics.setCanvas()
-  print("Celium's Fall smoke test passed: drop-through, platform A*, moving-platform waits, 6 panels, bosses/Sillius")
+  print("Celium's Fall smoke test passed: drop-through, platform A*, moving-platform waits, 9 panels, bosses/Sillius")
 end
 
 return State

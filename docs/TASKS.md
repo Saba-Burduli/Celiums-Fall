@@ -28,3 +28,4 @@
 - [x] Add moving platforms with actor carrying and solid wall collision.
 - [x] Replace static Mire Priest, Lord Celium, and Sillius rendering with Gothic animation.
 - [x] Add drop-through controls and platform-graph navigation for grounded enemies.
+- [x] Expand the route with Thornwatch Ruins, Drowned Ossuary, and Black Keep.

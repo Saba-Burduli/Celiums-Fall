@@ -1,14 +1,14 @@
 # Compressed Context
 
-Celium's Fall is a compact side-view dark fantasy action-platformer targeting a 15-minute run. Aren crosses six platform panels from the Cursed Forest to Celium's Summit, helps an Old Villager, recruits Sillius, kills the Mire Priest, and defeats Lord Celium. The whole frame renders at 640×360 with GothicVania CC0 pixel art and nearest-neighbor scaling.
+Celium's Fall is a compact side-view dark fantasy action-platformer. Aren crosses nine platform panels from the Cursed Forest through Thornwatch, the Drowned Ossuary, and the Black Keep to Celium's Summit; he helps an Old Villager, recruits Sillius, kills the Mire Priest, and defeats Lord Celium. The whole frame renders at 640×360 with GothicVania CC0 pixel art and nearest-neighbor scaling.
 
 ## Current loop
 
-Title → forest/moonstone quest → Forest Depths/Sillius patrol quest → unlock Chain Lightning and recruit Sillius → shrine/Mire Priest → crypt → mountain path → Lord Celium → victory. Checkpoints preserve area and progression.
+Title → forest/moonstone quest → Forest Depths/Sillius patrol quest → Thornwatch Ruins → shrine/Mire Priest → crypt/Ossuary → mountain path/Black Keep → Lord Celium → victory. Checkpoints preserve area and progression.
 
 ## Module map
 
-`core/state` owns lifecycle and panel transitions; `core/camera` owns the low-resolution canvas; `core/assets` owns Gothic animation/environment assets and fallbacks. `systems/platforms` creates stable runtime platforms and movement envelopes; `systems/collision` handles support tracking, one-way landings/drop-through, and solid walls; `systems/navigation` builds room-local platform graphs and A* routes for grounded enemies. Entities include player, six regular enemies, animated bosses, and animated Sillius. World modules define six platform layouts and spawns.
+`core/state` owns lifecycle and panel transitions; `core/camera` owns the low-resolution canvas; `core/assets` owns Gothic animation/environment assets and fallbacks. `systems/platforms` creates stable runtime platforms and movement envelopes; `systems/collision` handles support tracking, one-way landings/drop-through, and solid walls; `systems/navigation` builds room-local platform graphs and A* routes for grounded enemies. Entities include player, six regular enemies, animated bosses, and animated Sillius. World modules define nine platform layouts and spawns.
 
 ## Controls
 
