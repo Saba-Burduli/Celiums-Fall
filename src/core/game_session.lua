@@ -1,5 +1,6 @@
 local Cinematic = require("src.ui.cinematic")
 local Companion = require("src.entities.companion")
+local Fonts = require("src.ui.fonts")
 local Levels = require("src.world.levels")
 local Platforms = require("src.systems.platforms")
 local Player = require("src.entities.player")
@@ -84,8 +85,8 @@ function GameSession.new(saved, audio)
     prompt = nil,
     questObjective = "",
     fonts = {
-      small = love.graphics.newFont("assets/fonts/kenpixel-square.ttf", 16),
-      normal = love.graphics.newFont("assets/fonts/kenpixel-square.ttf", 20),
+      small = Fonts.get(16),
+      normal = Fonts.get(20),
     },
     audio = audio,
   }

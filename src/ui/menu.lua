@@ -1,18 +1,19 @@
 local Menu = {}
-local fonts = {}
 local Assets = require("src.core.assets")
+local Config = require("src.core.config")
+local Fonts = require("src.ui.fonts")
 
 local function center(text, y, size)
-  fonts[size] = fonts[size] or love.graphics.newFont("assets/fonts/kenpixel-square.ttf", size)
-  love.graphics.setFont(fonts[size])
-  love.graphics.printf(text, 0, y, 1280, "center")
+  love.graphics.setFont(Fonts.get(size))
+  love.graphics.printf(text, 0, y, Config.world.width, "center")
 end
 
 function Menu.draw(mode)
   if Assets.gothic and Assets.gothic.tiles then Assets.drawBackdrop({ background = { .018, .01, .03 }, theme = "church" })
   else love.graphics.clear(.025, .018, .04) end
   for i = 1, 45 do
-    local x, y = (i * 137) % 1280, (i * 83) % 720
+    local x = (i * 137) % Config.world.width
+    local y = (i * 83) % Config.world.height
     love.graphics.setColor(.22, .12, .3, .18)
     love.graphics.circle("fill", x, y, 2 + i % 4)
   end
@@ -34,7 +35,8 @@ function Menu.draw(mode)
 end
 
 function Menu.pause(settings, selection)
-  love.graphics.setColor(0, 0, 0, .72); love.graphics.rectangle("fill", 0, 0, 1280, 720)
+  love.graphics.setColor(0, 0, 0, .72)
+  love.graphics.rectangle("fill", 0, 0, Config.world.width, Config.world.height)
   love.graphics.setColor(.9, .85, .95); center("PAUSED", 155, 42)
   local options = {
     "Resume",

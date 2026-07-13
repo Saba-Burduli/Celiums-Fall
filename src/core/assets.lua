@@ -1,3 +1,5 @@
+local Config = require("src.core.config")
+
 local Assets = { current = "gothic", sets = {}, gothic = {} }
 
 local names = { "player", "shadow_thrall", "cursed_hound", "ash_cultist", "shielded_knight",
@@ -155,15 +157,18 @@ end
 function Assets.drawBackdrop(level)
   local theme = level.theme or "church"
   local moon = theme == "mountain" or theme == "summit"
-  love.graphics.setColor(level.background); love.graphics.rectangle("fill", 0, 0, 1280, 720)
+  local width, height = Config.world.width, Config.world.height
+  love.graphics.setColor(level.background)
+  love.graphics.rectangle("fill", 0, 0, width, height)
   love.graphics.setColor(moon and { .58, .12, .18, .32 } or { .38, .42, .62, .22 })
   love.graphics.circle("fill", 1030, 145, moon and 82 or 58)
   love.graphics.setColor(.045, .035, .07, .88)
-  love.graphics.polygon("fill", 0, 420, 170, 250, 300, 420, 470, 210, 660, 420, 850, 270, 1040, 420, 1180, 230, 1280, 380, 1280, 640, 0, 640)
+  love.graphics.polygon("fill", 0, 420, 170, 250, 300, 420, 470, 210, 660, 420,
+    850, 270, 1040, 420, 1180, 230, width, 380, width, 640, 0, 640)
   love.graphics.setColor(.08, .06, .11, .8)
   for x = 40, 1240, 130 do love.graphics.rectangle("fill", x, 315 + (x % 3) * 18, 18, 325); love.graphics.polygon("fill", x - 20, 340, x + 9, 270, x + 38, 340) end
   love.graphics.setColor(.25, .22, .35, .08)
-  for y = 390, 590, 55 do love.graphics.rectangle("fill", 0, y, 1280, 18) end
+  for y = 390, 590, 55 do love.graphics.rectangle("fill", 0, y, width, 18) end
 end
 
 function Assets.drawPlatforms(level)
