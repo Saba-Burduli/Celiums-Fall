@@ -12,6 +12,7 @@ local Quests = require("src.systems.quests")
 local Progression = require("src.systems.progression")
 local Hud = require("src.ui.hud")
 local Dialogue = require("src.ui.dialogue")
+local Cinematic = require("src.ui.cinematic")
 local Menu = require("src.ui.menu")
 local Audio = require("src.core.audio")
 local Save = require("src.core.save")
@@ -52,6 +53,7 @@ local function enterArea(game, name)
   game.player.x, game.player.y = game.level.entry[1], game.level.entry[2]
   if game.companion.status == "allied" then game.companion.x, game.companion.y = game.player.x - 35, game.player.y end
   notify(game, game.level.name)
+  Cinematic.start(game, name)
 end
 
 local function applySave(game, saved)
@@ -151,6 +153,7 @@ end
 function State.update(dt)
   if State.mode ~= "playing" then return end
   local game, p = State.game, State.game.player
+  if game.cinematic then Cinematic.update(game, dt); return end
   local riders = { p }
   for _, enemy in ipairs(game.enemies) do if not enemy.dead then table.insert(riders, enemy) end end
   if game.boss and not game.boss.dead then table.insert(riders, game.boss) end
@@ -227,6 +230,7 @@ function State.draw()
   drawWorld(State.game)
   Hud.draw(State.game)
   Dialogue.draw(State.game.message)
+  Cinematic.draw(State.game)
   if State.mode == "paused" then Menu.pause(Settings, State.pauseSelection) end
   Camera.endDraw()
 end
@@ -237,6 +241,10 @@ function State.keypressed(key)
   end
   if key == "c" and (State.mode == "title" or State.mode == "dead") and Save.exists() then
     State.game = newGame(Save.read()); State.mode = "playing"; return
+  end
+  if State.mode == "playing" and State.game.cinematic then
+    if key == "return" or key == "space" or key == "e" then Cinematic.advance(State.game) end
+    return
   end
   if key == "escape" and (State.mode == "playing" or State.mode == "paused") then
     State.mode = State.mode == "playing" and "paused" or "playing"
@@ -274,6 +282,10 @@ function State.keypressed(key)
 end
 
 function State.gamepadpressed(_, button)
+  if State.mode == "playing" and State.game.cinematic then
+    if button == "a" or button == "start" then Cinematic.advance(State.game) end
+    return
+  end
   if button == "start" then
     if State.mode == "title" or State.mode == "dead" or State.mode == "victory" then Save.clear(); State.game = newGame(); State.mode = "playing"
     elseif State.mode == "playing" or State.mode == "paused" then
@@ -319,6 +331,8 @@ end
 
 function State.smokeTest()
   local game = newGame()
+  assert(game.cinematic and game.cinematic.area == "forest", "opening lore cinematic did not start")
+  while game.cinematic do Cinematic.advance(game) end
   local rooms = { "forest", "forest_depths", "forest_ruins", "shrine", "shrine_crypt", "ossuary",
     "mountain_path", "black_keep", "mountain" }
   for _, room in ipairs(rooms) do
@@ -335,6 +349,7 @@ function State.smokeTest()
       if jumper.supportingPlatformId == "static:2" then break end
     end
     assert(jumper.supportingPlatformId == "static:2", "first elevated platform is unreachable: " .. room)
+    game.cinematic = nil
   end
   local original = Assets.current
   Assets.toggle(); Assets.toggle()
@@ -425,6 +440,11 @@ function State.smokeTest()
   love.graphics.setCanvas(canvas)
   drawWorld(game)
   Menu.pause(Settings, 2)
+  game.seenCinematics.black_keep = nil
+  assert(Cinematic.start(game, "black_keep"), "Black Keep lore cinematic did not start")
+  assert(game.cinematic and game.cinematic.scene.pages[1], "Black Keep lore cinematic missing")
+  Cinematic.draw(game)
+  game.cinematic = nil
   assert(#Assets.gothic.bosses.mire_priest.idle == 5, "Mire Priest animation frames missing")
   assert(#Assets.gothic.bosses.lord_celium.idle == 8 and #Assets.gothic.bosses.lord_celium.attack == 3, "Lord Celium animation frames missing")
   enterArea(game, "mountain")

@@ -4,11 +4,11 @@ Celium's Fall is a compact side-view dark fantasy action-platformer. Aren crosse
 
 ## Current loop
 
-Title → forest/moonstone quest → Forest Depths/Sillius patrol quest → Thornwatch Ruins → shrine/Mire Priest → crypt/Ossuary → mountain path/Black Keep → Lord Celium → victory. Checkpoints preserve area and progression.
+Title → opening lore cinematic → forest/moonstone quest → Forest Depths/Sillius patrol quest → Thornwatch Ruins → Mire Ward cinematic/shrine boss → crypt/Ossuary lore → mountain path/Black Keep lore → summit confrontation → Lord Celium → victory. Checkpoints preserve area and progression.
 
 ## Module map
 
-`core/state` owns lifecycle and panel transitions; `core/camera` owns the low-resolution canvas; `core/assets` owns Gothic animation/environment assets and fallbacks. `systems/platforms` creates stable runtime platforms and movement envelopes; `systems/collision` handles support tracking, one-way landings/drop-through, and solid walls; `systems/navigation` builds room-local platform graphs and A* routes for grounded enemies. Entities include player, six regular enemies, animated bosses, and animated Sillius. World modules define nine platform layouts and spawns.
+`core/state` owns lifecycle and panel transitions; `core/camera` owns the low-resolution canvas; `core/assets` owns Gothic animation/environment assets and fallbacks; `ui/cinematic` renders skippable layered story scenes from `data/lore`. `systems/platforms` creates stable runtime platforms and movement envelopes; `systems/collision` handles support tracking, one-way landings/drop-through, and solid walls; `systems/navigation` builds room-local platform graphs and A* routes for grounded enemies. Entities include player, six regular enemies, animated bosses, and animated Sillius. World modules define nine platform layouts and spawns.
 
 ## Controls
 

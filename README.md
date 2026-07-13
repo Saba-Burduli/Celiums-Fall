@@ -37,6 +37,7 @@ No external assets or Lua packages are required. To publish later, add a remote 
 - Side-view platforming with gravity, coyote-time jumping, drop-through ledges, moving platforms, solid walls, and aerial combat
 - Three connected areas: Cursed Forest, Ruined Shrine, Black Mountain
 - Nine rooms across the forest, shrine, and mountain route
+- Skippable in-engine cinematics explain Aren's betrayal, the Covenant, the veil, and the road to Lord Celium
 - Aren movement, dash, melee, magic, health, and mana
 - Three regular enemies and two bosses with distinct behaviors
 - Shielded Knight, Rift Witch, and Winged Curse enemy archetypes

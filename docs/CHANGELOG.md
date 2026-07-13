@@ -27,3 +27,4 @@
 - Corrected Aren's jump arc so every room's first elevated platform is reachable.
 - Expanded the journey to nine rooms with Thornwatch Ruins, Drowned Ossuary, and Black Keep encounters.
 - Replaced pause shortcuts with a navigable menu for master volume, SFX volume, and mute.
+- Added layered in-engine cinematics clarifying Aren's betrayal, the Ashen Covenant, the veil, and each major story threshold.
