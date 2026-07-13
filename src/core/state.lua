@@ -1,4 +1,5 @@
 local Camera = require("src.core.camera")
+local Actions = require("src.core.actions")
 local GameSession = require("src.core.game_session")
 local Input = require("src.core.input")
 local Player = require("src.entities.player")
@@ -67,99 +68,74 @@ function State.draw()
   Camera.endDraw()
 end
 
-function State.keypressed(key)
-  if key == "return" and (State.mode == "title" or State.mode == "dead" or State.mode == "victory") then
-    Save.clear(); State.game = GameSession.new(nil, Audio); State.hasSave = false; State.mode = "playing"; return
-  end
-  if key == "c" and (State.mode == "title" or State.mode == "dead") and Save.exists() then
-    State.game = GameSession.new(Save.read(), Audio); State.mode = "playing"; return
-  end
-  if State.mode == "playing" and State.game.cinematic then
-    if key == "return" or key == "space" or key == "e" then Cinematic.advance(State.game) end
+local function startGame(saved)
+  if not saved then Save.clear() end
+  State.game = GameSession.new(saved, Audio)
+  State.hasSave = false
+  State.mode = "playing"
+end
+
+local function changePauseSelection(amount)
+  State.pauseSelection = ((State.pauseSelection - 1 + amount) % 4) + 1
+end
+
+local function adjustPauseSetting(amount)
+  if State.pauseSelection == 2 then Settings.adjustMaster(amount) end
+  if State.pauseSelection == 3 then Settings.adjustSfx(amount) end
+end
+
+local function dispatch(action)
+  if not action then return end
+  if action == "new_game" then startGame(nil); return end
+  if action == "continue" then
+    if Save.exists() then startGame(Save.read()) end
     return
   end
-  if key == "escape" and (State.mode == "playing" or State.mode == "paused") then
+  if action == "cinematic_advance" then Cinematic.advance(State.game); return end
+  if action == "pause_toggle" then
     State.mode = State.mode == "playing" and "paused" or "playing"
     if State.mode == "paused" then State.pauseSelection = 1 end
     return
   end
-  if State.mode == "paused" then
-    if key == "up" or key == "w" then State.pauseSelection = State.pauseSelection == 1 and 4 or State.pauseSelection - 1 end
-    if key == "down" or key == "s" then State.pauseSelection = State.pauseSelection == 4 and 1 or State.pauseSelection + 1 end
-    if key == "left" or key == "a" then
-      if State.pauseSelection == 2 then Settings.adjustMaster(-.1) end
-      if State.pauseSelection == 3 then Settings.adjustSfx(-.1) end
-    end
-    if key == "right" or key == "d" then
-      if State.pauseSelection == 2 then Settings.adjustMaster(.1) end
-      if State.pauseSelection == 3 then Settings.adjustSfx(.1) end
-    end
-    if key == "return" or key == "space" then
-      if State.pauseSelection == 1 then State.mode = "playing" end
-      if State.pauseSelection == 4 then Settings.toggleMute() end
-    end
-    if key == "v" then Settings.cycleVolume() end
-    if key == "m" then Settings.toggleMute() end
+  if action == "pause_resume" then State.mode = "playing"; return end
+  if action == "menu_up" then changePauseSelection(-1); return end
+  if action == "menu_down" then changePauseSelection(1); return end
+  if action == "menu_decrease" then adjustPauseSetting(-.1); return end
+  if action == "menu_increase" then adjustPauseSetting(.1); return end
+  if action == "menu_confirm" then
+    if State.pauseSelection == 1 then State.mode = "playing" end
+    if State.pauseSelection == 4 then Settings.toggleMute() end
     return
   end
-  if State.mode ~= "playing" then return end
-  if key == "space" or key == "w" or key == "up" then
-    if Input.down() then Player.dropThrough(State.game.player) else Player.jump(State.game.player) end
+  if action == "volume_cycle" then Settings.cycleVolume(); return end
+  if action == "mute_toggle" then Settings.toggleMute(); return end
+
+  local game = State.game
+  if action == "jump" then
+    if Input.down() then Player.dropThrough(game.player) else Player.jump(game.player) end
+  elseif action == "dash" then
+    if Player.dash(game.player) then game.audio.play("dash") end
+  elseif action == "melee" then
+    Combat.melee(game)
+  elseif action == "magic" then
+    Combat.magic(game)
+  elseif action == "chain_lightning" then
+    Combat.chainLightning(game)
+  elseif action == "interact" then
+    WorldFlow.interact(game)
   end
-  if key == "lshift" or key == "rshift" then if Player.dash(State.game.player) then State.game.audio.play("dash") end end
-  if key == "j" then Combat.melee(State.game) end
-  if key == "k" then Combat.magic(State.game) end
-  if key == "l" then Combat.chainLightning(State.game) end
-  if key == "e" then WorldFlow.interact(State.game) end
+end
+
+function State.keypressed(key)
+  dispatch(Actions.key(key, State.mode, State.game and State.game.cinematic))
 end
 
 function State.gamepadpressed(_, button)
-  if State.mode == "playing" and State.game.cinematic then
-    if button == "a" or button == "start" then Cinematic.advance(State.game) end
-    return
-  end
-  if button == "start" then
-    if State.mode == "title" or State.mode == "dead" or State.mode == "victory" then
-      Save.clear(); State.game = GameSession.new(nil, Audio); State.mode = "playing"
-    elseif State.mode == "playing" or State.mode == "paused" then
-      State.mode = State.mode == "playing" and "paused" or "playing"
-      if State.mode == "paused" then State.pauseSelection = 1 end
-    end
-    return
-  end
-  if State.mode == "paused" then
-    if button == "dpup" then State.pauseSelection = State.pauseSelection == 1 and 4 or State.pauseSelection - 1 end
-    if button == "dpdown" then State.pauseSelection = State.pauseSelection == 4 and 1 or State.pauseSelection + 1 end
-    if button == "dpleft" then
-      if State.pauseSelection == 2 then Settings.adjustMaster(-.1) end
-      if State.pauseSelection == 3 then Settings.adjustSfx(-.1) end
-    end
-    if button == "dpright" then
-      if State.pauseSelection == 2 then Settings.adjustMaster(.1) end
-      if State.pauseSelection == 3 then Settings.adjustSfx(.1) end
-    end
-    if button == "a" then
-      if State.pauseSelection == 1 then State.mode = "playing" end
-      if State.pauseSelection == 4 then Settings.toggleMute() end
-    end
-    if button == "b" then State.mode = "playing" end
-    return
-  end
-  if State.mode ~= "playing" then return end
-  if button == "a" then
-    if Input.down() then Player.dropThrough(State.game.player) else Player.jump(State.game.player) end
-  end
-  if button == "x" then Combat.melee(State.game) end
-  if button == "y" then Combat.magic(State.game) end
-  if button == "rightshoulder" then Combat.chainLightning(State.game) end
-  if button == "b" and Player.dash(State.game.player) then State.game.audio.play("dash") end
-  if button == "leftshoulder" then WorldFlow.interact(State.game) end
+  dispatch(Actions.gamepad(button, State.mode, State.game and State.game.cinematic))
 end
 
 function State.mousepressed(_, _, button)
-  if State.mode ~= "playing" then return end
-  if button == 1 then Combat.melee(State.game) end
-  if button == 2 then Combat.magic(State.game) end
+  dispatch(Actions.mouse(button, State.mode))
 end
 
 function State.smokeTest()

@@ -1,0 +1,28 @@
+local Actions = require("src.core.actions")
+local Helper = require("tests.test_helper")
+
+Helper.test("keyboard and controller map equivalent gameplay actions", function()
+  Helper.equal(Actions.key("space", "playing"), Actions.gamepad("a", "playing"))
+  Helper.equal(Actions.key("j", "playing"), Actions.gamepad("x", "playing"))
+  Helper.equal(Actions.key("k", "playing"), Actions.gamepad("y", "playing"))
+  Helper.equal(Actions.key("e", "playing"), Actions.gamepad("leftshoulder", "playing"))
+end)
+
+Helper.test("cinematics intercept gameplay input", function()
+  Helper.equal(Actions.key("space", "playing", true), "cinematic_advance")
+  Helper.equal(Actions.gamepad("start", "playing", true), "cinematic_advance")
+  Helper.equal(Actions.key("j", "playing", true), nil)
+end)
+
+Helper.test("pause actions are mode specific", function()
+  Helper.equal(Actions.key("escape", "playing"), "pause_toggle")
+  Helper.equal(Actions.gamepad("start", "paused"), "pause_toggle")
+  Helper.equal(Actions.key("down", "paused"), "menu_down")
+  Helper.equal(Actions.gamepad("dpright", "paused"), "menu_increase")
+end)
+
+Helper.test("title and death modes expose the expected starts", function()
+  Helper.equal(Actions.key("return", "title"), "new_game")
+  Helper.equal(Actions.gamepad("start", "dead"), "new_game")
+  Helper.equal(Actions.key("c", "dead"), "continue")
+end)
