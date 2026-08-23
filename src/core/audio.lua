@@ -13,6 +13,8 @@ local function tone(frequency, duration, volume, wave)
   return love.audio.newSource(data, "static")
 end
 
+//test unit
+
 function Audio.load()
   Audio.sounds = {
     melee = tone(105, .09, .16, "square"), magic = tone(380, .16, .12), hit = tone(72, .1, .2, "square"),
