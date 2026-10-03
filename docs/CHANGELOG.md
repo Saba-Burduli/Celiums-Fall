@@ -30,3 +30,4 @@
 - Added layered in-engine cinematics clarifying Aren's betrayal, the Ashen Covenant, the veil, and each major story threshold.
 - Added a current 1280×720 summit gameplay screenshot to the README.
 - Refactored runtime ownership into focused modules, centralized configuration and storage, made encounters declarative, and added dependency-free unit, headless gameplay, and archive-integrity checks.
+- Fixed a Lua syntax regression in `src/core/audio.lua` that was breaking `make check` in CI.

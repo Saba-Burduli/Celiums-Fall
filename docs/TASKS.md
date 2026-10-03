@@ -33,3 +33,4 @@
 - [x] Add skippable in-engine lore cinematics at major story thresholds.
 - [x] Refactor runtime ownership into focused session, flow, rendering, actions, storage, encounter, and navigation modules.
 - [x] Add dependency-free unit tests plus headless gameplay and package-integrity CI checks.
+- [x] Remove invalid non-Lua comment syntax from `src/core/audio.lua` to restore CI checks.
